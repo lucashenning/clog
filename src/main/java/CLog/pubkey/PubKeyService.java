@@ -1,5 +1,7 @@
 package CLog.pubkey;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import CLog.KeyPaar;
@@ -15,6 +17,8 @@ import java.util.Random;
  */
 @Service
 public class PubKeyService {
+
+    private static Log log = LogFactory.getLog(PubKeyService.class);
 
     @Autowired
     private KeyPaarRepository keyPaarRepository;
@@ -34,7 +38,7 @@ public class PubKeyService {
             priv = keyPair.getPrivate();
 
         } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
+            log.warn("Hier ist aber mächtig was schief gegangen", e);
         }
 
 
@@ -48,6 +52,7 @@ public class PubKeyService {
 
         // PubKey für die REST Schnittstelle erzeugen und zurückgeben
         PubKey pubKey = new PubKey(convertToString(priv.getEncoded()), convertToString(pub.getEncoded()), timestamp);
+        log.debug("Key Generierung erfolgreich. Public Key: "+pubKey.getKey()+" Private Key: "+convertToString(priv.getEncoded()));
         return pubKey;
     }
 
