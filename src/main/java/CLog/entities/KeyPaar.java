@@ -1,4 +1,4 @@
-package CLog;
+package CLog.entities;
 
 import org.springframework.data.annotation.Id;
 
@@ -12,23 +12,22 @@ import java.util.Date;
 public class KeyPaar {
 
     @Id
-    private long id;
+    private String id;
     private Date timestamp;
     private PublicKey pub;
     private PrivateKey priv;
 
-    public KeyPaar(long id, Date timestamp, PublicKey pub, PrivateKey priv) {
-        this.id = id;
+    public KeyPaar(Date timestamp, PublicKey pub, PrivateKey priv) {
         this.timestamp = timestamp;
         this.pub = pub;
         this.priv = priv;
     }
 
-    public long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(String id) {
         this.id = id;
     }
 
