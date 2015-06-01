@@ -1,13 +1,13 @@
 package CLog.Helper;
 
+import org.apache.commons.codec.binary.Hex;
+
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
-
-import org.apache.commons.codec.binary.Hex;
 
 /**
  * Created by Lucas on 12.05.2015.
