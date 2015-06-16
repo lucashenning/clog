@@ -1,5 +1,6 @@
 package CLog.controller;
 
+import CLog.entities.EventDTO;
 import CLog.entities.KeyPaar;
 import CLog.entities.PubKeyDTO;
 import CLog.services.KeyService;
@@ -10,11 +11,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
+
 /**
  * Created by Lucas on 11.05.2015.
  */
 @RestController
-@RequestMapping("/key")
+@RequestMapping("/api/key")
 public class PubKeyController {
 
     private static Log log = LogFactory.getLog(PubKeyController.class);
@@ -27,6 +30,12 @@ public class PubKeyController {
         KeyPaar keyPaar = keyService.generateKeyPaar();
         log.info("New KeyPaar generated.");
         return KeyService.getPubKey(keyPaar);
+    }
+
+    @RequestMapping(value="/all", method = RequestMethod.GET)
+    public ArrayList<EventDTO> getAllKeys() {
+        log.info("All Events requested.");
+        return keyService.getAllKeyEvents();
     }
 
 }

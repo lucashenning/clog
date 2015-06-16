@@ -1,0 +1,35 @@
+<div class="modal-header">
+    <h3>Request Form</h3>
+</div>
+<div class="modal-body">
+    <!--<alert ng-repeat="alert in alerts" type="alert.type" close="closeAlert($index)">{{alert.msg}}</alert>-->
+    <form name="requestForm" class="form-horizontal">
+        <div class="control-group">
+            <label class="control-label" for="initiator">Initiator</label>
+            <div class="controls">
+                <input id="initiator" name="initiator" ng-model="request.initiator" type="text" placeholder="Initiator" class="input-xlarge" required=""  ng-class="{error: request.initiator.$invalid && !request.initiator.$pristine}"/>
+            </div>
+        </div>
+
+        <div class="control-group" ng-class="{error: request.startDate.$invalid && !request.startDate.$pristine}">
+            <label class="control-label" for="startDate">Start Datum</label>
+            <div class="controls">
+                <input type="text" class="input-xlarge" datepicker-popup="dd-MM-yyyy" ng-model="request.startDate" is-open="opened" min="minDate" max="'2015-06-22'" datepicker-options="" date-disabled="disabled(date, mode)" ng-required="true" show-weeks="false" show-button-bar="false" />
+            </div>
+        </div>
+
+        <div class="control-group" ng-class="{error: request.endDate.$invalid && !request.endDate.$pristine}">
+            <label class="control-label" for="endDate">Ende Datum</label>
+            <div class="controls">
+                <input type="text" class="input-xlarge" datepicker-popup="dd-MM-yyyy" ng-model="request.endDate" is-open="opened" min="minDate" max="'2015-06-22'" datepicker-options="" date-disabled="disabled(date, mode)" ng-required="true" show-weeks="false" show-button-bar="false" />
+            </div>
+        </div>
+
+
+    </form>
+</div>
+<div class="modal-footer">
+    <button ng-click="save()" ng-if="request.id" ng-disabled="request.$invalid || !request.tnc" class="btn btn-primary"><i class="icon-white icon-plus"></i> Save</button>
+    <button ng-click="add()" type="submit" ng-if="!request.id" ng-disabled="request.$invalid || !request.tnc" class="btn btn-primary"><i class="icon-white icon-plus"></i> Add</button>
+    <button ng-click="cancel()" class="btn">Cancel</button>
+</div>

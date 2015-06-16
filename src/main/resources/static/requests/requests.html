@@ -1,0 +1,36 @@
+<h1>Requests</h1>
+<section>
+    <input type="text" ng-model="search" class="search-query pull-left" placeholder="Suche...">
+    <button ng-click="open()" class="btn btn-primary pull-right"><i class="icon-white icon-plus"></i> Request hinzufügen</button>
+</section>
+
+<table ng-table="tableParams" class="table">
+    <thead>
+    <tr>
+        <th>Timestamp</th>
+        <th>Id</th>
+        <th>PubKey</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr ng-repeat="request in requests | orderByPriority | filter:search | orderBy:'timestamp'">
+        <td data-title="'Timestamp'">
+            <span ng-if="!user.$edit">{{request.timestamp}}</span>
+            <div ng-if="user.$edit"><input class="form-control" type="text" ng-model="user.name" /></div>
+        </td>
+        <td data-title="'Id'" width="330">
+            <span ng-if="!user.$edit">{{request.id}}</span>
+            <div ng-if="user.$edit"><input class="form-control" type="text" ng-model="user.designation" /></div>
+        </td>
+        <td data-title="'PubKey'" width="330">
+            <span ng-if="!user.$edit">{{request.pubKey}}</span>
+            <div ng-if="user.$edit"><input class="form-control" type="text" ng-model="user.designation" /></div>
+        </td>
+        <td data-title="'Actions'" width="200">
+            <a ng-if="!user.$edit" href="" class="btn btn-primary btn-xs" ng-click="open(user.$id)">Edit</a>
+            <a ng-if="!user.$destroy" ng-click="removeRecord(user.$id)" class="btn btn-default btn-xs">Delete</a>
+            <a ng-if="user.$edit" href="" class="btn btn-primary btn-xs" ng-click="save()">Save</a>
+        </td>
+    </tr>
+    </tbody>
+</table>

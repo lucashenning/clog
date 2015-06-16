@@ -2,7 +2,7 @@ package CLog;
 
 import org.junit.Assert;
 import org.junit.Test;
-import CLog.Helper.CryptHelper;
+import CLog.helper.CryptHelper;
 
 import java.security.*;
 

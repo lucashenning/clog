@@ -1,0 +1,28 @@
+<h1>Events</h1>
+<h3>Jedes Event entspricht einem bereits verschlüsselten Logeintrag</h3>
+<section>
+    <div class="input-group">
+        <input type="text" ng-model="search" class="search-query pull-left form-control" placeholder="Suche...">
+        <span class="input-group-btn">
+            <button class="btn btn-default" type="button">Go!</button>
+        </span>
+    </div>
+</section>
+<div ng-controller="events" ng-cloak class="ng-cloak">
+    <table class="table table-striped" style="overflow: hidden; text-overflow: ellipsis">
+        <thead>
+        <tr>
+            <th>Timestamp</th>
+            <th>Id</th>
+            <th>PubKey</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr ng-repeat="event in events | filter:search | orderBy:'timestamp'">
+            <td data-title="'Timestamp'" width="100">{{event.timestamp | date:"MM/dd/yyyy 'at' h:mma"}}</td>
+            <td data-title="'Id'" width="100">{{event.id}}</td>
+            <td data-title="'PubKey'">{{event.pubKey}}</td>
+        </tr>
+        </tbody>
+    </table>
+</div>

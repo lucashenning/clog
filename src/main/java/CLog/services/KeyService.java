@@ -1,5 +1,6 @@
 package CLog.services;
 
+import CLog.entities.EventDTO;
 import CLog.entities.KeyPaar;
 import CLog.entities.PubKeyDTO;
 import CLog.repositories.KeyPaarRepository;
@@ -8,9 +9,13 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.security.*;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.Random;
+import java.util.List;
 
 
 /**
@@ -26,8 +31,8 @@ public class KeyService {
 
     public KeyPaar generateKeyPaar() {
         KeyPair keyPair = null;
-        PublicKey pub = null;
-        PrivateKey priv = null;
+        String pub = null;
+        String priv = null;
         try {
 
             KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
@@ -35,8 +40,8 @@ public class KeyService {
             keyPairGenerator.initialize(2048, random);
 
             keyPair = keyPairGenerator.generateKeyPair();
-            pub = keyPair.getPublic();
-            priv = keyPair.getPrivate();
+            pub = convertToString(keyPair.getPublic().getEncoded());
+            priv = convertToString(keyPair.getPrivate().getEncoded());
 
         } catch (NoSuchAlgorithmException e) {
             log.warn("Hier ist aber mächtig was schief gegangen", e);
@@ -44,8 +49,6 @@ public class KeyService {
 
 
         // KeyPaar für die DB erzeugen und speichern
-        Random randomlong = new Random();
-        long id = randomlong.nextLong();
         Date timestamp = new Date();
         KeyPaar keyPaar = new KeyPaar(timestamp, pub, priv);
         // KeyPair in MongoDB abspeichern:
@@ -55,8 +58,21 @@ public class KeyService {
     public static PubKeyDTO getPubKey(KeyPaar keyPaar) {
         PubKeyDTO pubKeyDTO = new PubKeyDTO();
         pubKeyDTO.setId(keyPaar.getId());
-        pubKeyDTO.setPubKey(convertToString(keyPaar.getPub().getEncoded()));
+        pubKeyDTO.setPubKey(keyPaar.getPub());
         return pubKeyDTO;
+    }
+
+    public ArrayList<EventDTO> getAllKeyEvents() {
+        List<KeyPaar> keyPaars = keyPaarRepository.findAll();
+        ArrayList<EventDTO> events = new ArrayList<EventDTO>();
+        for (KeyPaar keyPaar : keyPaars) {
+            EventDTO current = new EventDTO();
+            current.setId(keyPaar.getId());
+            current.setPubKey(keyPaar.getPub());
+            current.setTimestamp(keyPaar.getTimestamp());
+            events.add(current);
+        }
+        return events;
     }
 
     private static String convertToString(byte[] bytes) {
