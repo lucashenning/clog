@@ -1,2 +1,2 @@
-var app = angular.module('clog', ['ngRoute', 'ngResource']);
+var app = angular.module('clog', ['ngRoute', 'ngResource', 'ui.bootstrap']);
 

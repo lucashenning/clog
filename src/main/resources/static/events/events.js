@@ -7,4 +7,4 @@ app.controller('events', function($scope, $http) {
         success(function(data) {
             $scope.events = data;
         });
-})
+});

@@ -1,36 +1,38 @@
-<h1>Requests</h1>
-<section>
-    <input type="text" ng-model="search" class="search-query pull-left" placeholder="Suche...">
-    <button ng-click="open()" class="btn btn-primary pull-right"><i class="icon-white icon-plus"></i> Request hinzufügen</button>
-</section>
+<div ng-controller="requests" ng-cloak class="ng-cloak">
+    <h1>Requests</h1>
+    <alert ng-repeat="alert in alerts" type="alert.type" close="closeAlert($index)">{{alert.msg}}</alert>
 
-<table ng-table="tableParams" class="table">
-    <thead>
-    <tr>
-        <th>Timestamp</th>
-        <th>Id</th>
-        <th>PubKey</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr ng-repeat="request in requests | orderByPriority | filter:search | orderBy:'timestamp'">
-        <td data-title="'Timestamp'">
-            <span ng-if="!user.$edit">{{request.timestamp}}</span>
-            <div ng-if="user.$edit"><input class="form-control" type="text" ng-model="user.name" /></div>
-        </td>
-        <td data-title="'Id'" width="330">
-            <span ng-if="!user.$edit">{{request.id}}</span>
-            <div ng-if="user.$edit"><input class="form-control" type="text" ng-model="user.designation" /></div>
-        </td>
-        <td data-title="'PubKey'" width="330">
-            <span ng-if="!user.$edit">{{request.pubKey}}</span>
-            <div ng-if="user.$edit"><input class="form-control" type="text" ng-model="user.designation" /></div>
-        </td>
-        <td data-title="'Actions'" width="200">
-            <a ng-if="!user.$edit" href="" class="btn btn-primary btn-xs" ng-click="open(user.$id)">Edit</a>
-            <a ng-if="!user.$destroy" ng-click="removeRecord(user.$id)" class="btn btn-default btn-xs">Delete</a>
-            <a ng-if="user.$edit" href="" class="btn btn-primary btn-xs" ng-click="save()">Save</a>
-        </td>
-    </tr>
-    </tbody>
-</table>
+    <section>
+        <div class="input-group">
+            <input type="text" ng-model="search" class="search-query pull-left form-control" placeholder="Suche...">
+            <span class="input-group-btn">            <button class="btn btn-default" type="button">Go!</button></span>
+            <button ng-click="openModal()" class="btn btn-primary pull-right"><i class="icon-white icon-plus"></i> Request hinzufügen</button>
+        </div>
+    </section>
+
+    <table ng-table="tableParams" class="table table-striped">
+        <thead>
+        <tr>
+            <th>Id</th>
+            <th>Initiator</th>
+            <th>Timestamp</th>
+            <th>StartDate</th>
+            <th>EndDate</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr ng-repeat="request in requests | filter:search | orderBy:'timestamp'">
+            <td data-title="'Id'">{{request.id}}</td>
+            <td data-title="'Initiator'">{{request.initiator}}</td>
+            <td data-title="'Timestamp'">{{request.timestamp | date:"MM/dd/yyyy 'um' hh:mm"}}</td>
+            <td data-title="'StartDatum'">{{request.startDate | date:"MM/dd/yyyy 'um' hh:mm"}}</td>
+            <td data-title="'EndDatum'">{{request.endDate | date:"MM/dd/yyyy 'um' hh:mm"}}</td>
+            <td data-title="'Actions'">
+                <a href="" ng-click="openModal(request)" class="btn btn-primary btn-xs" >Edit</a>
+                <a href="" ng-click="removeRecord($index)" class="btn btn-default btn-xs" >Delete</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>

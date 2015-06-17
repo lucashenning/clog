@@ -9,9 +9,9 @@
     </div>
     <div class="collapse navbar-collapse" ng-class="{in: showMobileNav}">
         <ul class="nav navbar-nav">
-            <li ng-repeat="route in routes" ng-class="{active: activeRoute(route)}">
-                <a href="#{{ route.path }}">{{ route.name }}</a>
-            </li>
+            <li ng-class="{active: activetab=='/'}"><a href="#/">Home</a></li>
+            <li ng-class="{active: activetab=='/requests'}"><a href="#/requests">Requests</a></li>
+            <li ng-class="{active: activetab=='/events'}"><a href="#/events">Events</a></li>
         </ul>
     </div>
 </nav>

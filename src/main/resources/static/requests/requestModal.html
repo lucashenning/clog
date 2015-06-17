@@ -1,0 +1,35 @@
+<div class="modal-header">
+    <button ng-click="closeModal()" type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    <h4 class="modal-title">Request bearbeiten</h4>
+</div>
+<div class="modal-body">
+
+
+
+
+    <form>
+        <div class="form-group">
+            <label for="initiator">Initiator</label>
+            <input ng-model="request.initiator" ng-class="{error: request.initiator.$invalid && !request.initiator.$pristine}" type="text" class="form-control" id="initiator" placeholder="Initiator">
+        </div>
+
+        <div class="form-group">
+            <label for="startDate">Start Datum</label>
+            <input id="startDate" name="startDate" type="date" ng-model="request.startDate" placeholder="dd-MM-yyyy" min="2013-01-01" class="form-control" />
+        </div>
+
+        <div class="form-group">
+            <label for="endDate">Ende Datum</label>
+            <input id="endDate" name="endDate" type="date" ng-model="request.endDate" placeholder="dd-MM-yyyy" min="2013-01-01" class="form-control" />
+        </div>
+    </form>
+
+
+
+
+</div>
+<div class="modal-footer">
+    <button ng-click="closeModal()" type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+    <button ng-click="saveModal()" type="button" class="btn btn-primary">Speichern!</button>
+</div>
+</div><!-- /.modal-content -->

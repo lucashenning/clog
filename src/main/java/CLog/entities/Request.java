@@ -20,6 +20,13 @@ public class Request {
     private Date endDate;
 
 
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public String getInitiator() {
         return initiator;

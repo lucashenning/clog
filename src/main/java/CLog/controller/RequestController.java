@@ -1,7 +1,7 @@
 package CLog.controller;
 
 import CLog.entities.Request;
-import CLog.repositories.RequestRepository;
+import CLog.services.RequestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,16 +15,29 @@ import java.util.List;
 public class RequestController {
 
     @Autowired
-    private RequestRepository requestRepository;
+    private RequestService requestService;
 
     @RequestMapping(method = RequestMethod.GET)
     public List<Request> getAll() {
-        return requestRepository.findAll();
+        return requestService.getAll();
     }
 
-    @RequestMapping(method = RequestMethod.POST)
-    public void add(@RequestBody Request newrequest) {
-        requestRepository.save(newrequest);
+    // get request by id (Path)
+    @RequestMapping(value="/{id}", method = RequestMethod.GET)
+    public Request getOnebyPath(@PathVariable String id) {
+        return requestService.getOne(id);
     }
+
+
+    @RequestMapping(method = RequestMethod.POST)
+    public Request add(@RequestBody Request newrequest) {
+        return requestService.newRequest(newrequest); // Wandelt den neuen (unvollständigen) Request um und schickt den vollständigen zurück.
+    }
+
+    @RequestMapping(value="/{id}", method = RequestMethod.DELETE)
+    public void delete(@PathVariable String id) {
+        requestService.deleteRequest(id);
+    }
+
 
 }

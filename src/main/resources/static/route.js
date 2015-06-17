@@ -15,8 +15,9 @@ app.config(function ($routeProvider) {
         }).otherwise({
             redirectTo: "/"
         });
-    }).run(function ($rootScope, $location, $route) {
-        $rootScope.$location = $location;
-        $rootScope.$route = $route;
-        $rootScope.keys = Object.keys;
-    });
+    }).run(['$rootScope', '$location', function($rootScope, $location){
+        var path = function() { return $location.path();};
+        $rootScope.$watch(path, function(newVal, oldVal){
+            $rootScope.activetab = newVal;
+        });
+    }]);
