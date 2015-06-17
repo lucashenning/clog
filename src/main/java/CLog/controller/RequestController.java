@@ -33,6 +33,10 @@ public class RequestController {
     public Request add(@RequestBody Request newrequest) {
         return requestService.newRequest(newrequest); // Wandelt den neuen (unvollständigen) Request um und schickt den vollständigen zurück.
     }
+    @RequestMapping(value="/{id}", method = RequestMethod.POST)
+    public Request save(@RequestBody Request request) {
+        return requestService.newRequest(request); // Speichert den Request
+    }
 
     @RequestMapping(value="/{id}", method = RequestMethod.DELETE)
     public void delete(@PathVariable String id) {

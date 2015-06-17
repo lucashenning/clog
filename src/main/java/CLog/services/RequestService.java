@@ -20,14 +20,17 @@ public class RequestService {
     private RequestRepository requestRepository;
 
     public Request newRequest(Request preRequest) {
-        Request request = new Request();
-        request.setTimestamp(preRequest.getTimestamp());
-        request.setInitiator(preRequest.getInitiator());
-        request.setStartDate(preRequest.getStartDate());
-        request.setEndDate(preRequest.getEndDate());
-        request.setTimestamp(new Date());
-        requestRepository.save(request);
-        return request;
+        if ( preRequest.getId() != null && requestRepository.exists(preRequest.getId()) ) {
+            return requestRepository.save(preRequest);
+        } else {
+            Request request = new Request();
+            request.setTimestamp(preRequest.getTimestamp());
+            request.setInitiator(preRequest.getInitiator());
+            request.setStartDate(preRequest.getStartDate());
+            request.setEndDate(preRequest.getEndDate());
+            request.setTimestamp(new Date());
+            return requestRepository.save(request);
+        }
     }
 
     public Request getOne(String id) {

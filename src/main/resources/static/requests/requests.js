@@ -23,6 +23,9 @@ app.controller('requests', function($scope, RequestFactory, $modal) {
             resolve: {
                 request: function() {
                     return request;
+                },
+                requests: function () {
+                    return $scope.requests;
                 }
             }
         })
@@ -40,7 +43,7 @@ app.controller('requests', function($scope, RequestFactory, $modal) {
 
 });
 
-app.controller('requestModal', function($scope, $modalInstance, request, RequestFactory) {
+app.controller('requestModal', function($scope, $modalInstance, request, RequestFactory, requests) {
     if (angular.isDefined(request)) {
         $scope.request = request;
         $scope.newrequest = false;
@@ -55,6 +58,7 @@ app.controller('requestModal', function($scope, $modalInstance, request, Request
 
     $scope.saveModal = function () {
         $scope.request.$save();
+        requests.push($scope.request);
         $modalInstance.close();
     }
 
