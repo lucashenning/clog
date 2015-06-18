@@ -1,38 +1,39 @@
 <div ng-controller="requests" ng-cloak class="ng-cloak">
-    <h1>Requests</h1>
-    <alert ng-repeat="alert in alerts" type="alert.type" close="closeAlert($index)">{{alert.msg}}</alert>
+<h1>Requests</h1>
+<alert ng-repeat="alert in alerts" type="alert.type" close="closeAlert($index)">{{alert.msg}}</alert>
 
-    <section>
-        <div class="input-group">
-            <input type="text" ng-model="search" class="search-query pull-left form-control" placeholder="Suche...">
-            <span class="input-group-btn">            <button class="btn btn-default" type="button">Go!</button></span>
-            <button ng-click="openModal()" class="btn btn-primary pull-right"><i class="icon-white icon-plus"></i> Request hinzufügen</button>
-        </div>
-    </section>
+<section>
+    <div class="input-group">
+        <input type="text" ng-model="search" class="search-query pull-left form-control" placeholder="Suche...">
+        <span class="input-group-btn">            <button class="btn btn-default" type="button">Go!</button></span>
+        <button ng-click="openModal()" class="btn btn-primary pull-right"><i class="icon-white icon-plus"></i> Request hinzufügen</button>
+    </div>
+</section>
 
-    <table ng-table="tableParams" class="table table-striped">
-        <thead>
-        <tr>
-            <th>Id</th>
-            <th>Initiator</th>
-            <th>Timestamp</th>
-            <th>StartDate</th>
-            <th>EndDate</th>
-            <th>Actions</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr ng-repeat="request in requests | filter:search | orderBy:'timestamp'">
-            <td data-title="'Id'">{{request.id}}</td>
-            <td data-title="'Initiator'">{{request.initiator}}</td>
-            <td data-title="'Timestamp'">{{request.timestamp | date:"MM/dd/yyyy 'um' hh:mm"}}</td>
-            <td data-title="'StartDatum'">{{request.startDate | date:"MM/dd/yyyy 'um' hh:mm"}}</td>
-            <td data-title="'EndDatum'">{{request.endDate | date:"MM/dd/yyyy 'um' hh:mm"}}</td>
-            <td data-title="'Actions'">
-                <a href="" ng-click="openModal(request)" class="btn btn-primary btn-xs" >Edit</a>
-                <a href="" ng-click="removeRecord($index)" class="btn btn-default btn-xs" >Delete</a>
-            </td>
-        </tr>
-        </tbody>
-    </table>
+<table ng-table="tableParams" class="table table-striped">
+    <thead>
+    <tr>
+        <th>Id</th>
+        <th>Initiator</th>
+        <th>Timestamp</th>
+        <th>StartDate</th>
+        <th>EndDate</th>
+        <th>Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr ng-repeat="request in requests | filter:search | orderBy:'timestamp'">
+        <td data-title="'Id'">{{request.id}}</td>
+        <td data-title="'Initiator'">{{request.initiator}}</td>
+        <td data-title="'Timestamp'">{{request.timestamp | date:"MM/dd/yyyy 'um' hh:mm"}}</td>
+        <td data-title="'StartDatum'">{{request.startDate | date:"dd.MM.yyyy"}}</td>
+        <td data-title="'EndDatum'">{{request.endDate | date:"dd.MM.yyyy"}}</td>
+        <td data-title="'Actions'">
+            <a href="" ng-click="approve()" class="btn btn-success btn-xs" >Approve</a>
+            <a href="" ng-click="openModal(request)" class="btn btn-primary btn-xs" >Edit</a>
+            <a href="" ng-click="removeRecord($index)" class="btn btn-default btn-xs" >Delete</a>
+        </td>
+    </tr>
+    </tbody>
+</table>
 </div>

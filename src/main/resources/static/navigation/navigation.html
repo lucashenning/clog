@@ -1,3 +1,4 @@
+<div ng-controller="navigation" class="container">
 <nav class="navbar navbar-default" role="navigation">
     <div class="navbar-header">
         <button type="button" class="navbar-toggle collapsed" ng-click="showMobileNav = !showMobileNav">
@@ -10,8 +11,32 @@
     <div class="collapse navbar-collapse" ng-class="{in: showMobileNav}">
         <ul class="nav navbar-nav">
             <li ng-class="{active: activetab=='/'}"><a href="#/">Home</a></li>
-            <li ng-class="{active: activetab=='/requests'}"><a href="#/requests">Requests</a></li>
-            <li ng-class="{active: activetab=='/events'}"><a href="#/events">Events</a></li>
+            <li ng-show="authenticated" ng-class="{active: activetab=='/requests'}"><a href="#/requests">Requests</a></li>
+            <li ng-show="authenticated" ng-class="{active: activetab=='/events'}"><a href="#/events">Events</a></li>
         </ul>
+        <ul class="nav navbar-nav navbar-right">
+
+            <li ng-show="authenticated" class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Logged in as <b>{{username}}</b> <span class="caret"></span></a>
+                <ul class="dropdown-menu">
+                    <li><a href="" ng-click="logout()">Logout</a></li>
+                </ul>
+            </li>
+
+
+
+            <form ng-show="!authenticated" class="navbar-form navbar-right" role="search" role="form" ng-submit="login()">
+                <div class="form-group">
+                    <input type="text" class="form-control" id="username" name="username" placeholder="Username" ng-model="credentials.username"/>
+                </div>
+                <div class="form-group">
+                    <input type="password" class="form-control" id="password" name="password" placeholder="Passwort" ng-model="credentials.password"/>
+                </div>
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+
+        </ul>
+
     </div>
 </nav>
+</div>
