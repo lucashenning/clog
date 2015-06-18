@@ -38,4 +38,9 @@ public class PubKeyController {
         return keyService.getAllKeyEvents();
     }
 
+    @RequestMapping(value="/count", method = RequestMethod.GET)
+    public long count() {
+        return keyService.count();
+    }
+
 }

@@ -1,17 +1,22 @@
 package CLog;
 
+import CLog.services.MongoUserDetailsService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.authentication.configurers.GlobalAuthenticationConfigurerAdapter;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.web.csrf.CsrfFilter;
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.security.web.csrf.CsrfTokenRepository;
 import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.WebUtils;
 
@@ -43,7 +48,7 @@ public class SecretServerApplication {
                     .antMatchers("/", "/**.js", "/**/**.js", "/**/**.html").permitAll().anyRequest()
                     .authenticated()
             .and()
-                    .csrf()
+                    .csrf().requireCsrfProtectionMatcher(csrfRequestMatcher).and().csrf()
                     .csrfTokenRepository(csrfTokenRepository()).and()
                     .addFilterAfter(csrfHeaderFilter(), CsrfFilter.class);
         }
@@ -69,13 +74,58 @@ public class SecretServerApplication {
                     filterChain.doFilter(request, response);
                 }
             };
-        }
+        } // Filter zum Umgang mit AngularJS XSRF Token
 
         private CsrfTokenRepository csrfTokenRepository() {
             HttpSessionCsrfTokenRepository repository = new HttpSessionCsrfTokenRepository();
             repository.setHeaderName("X-XSRF-TOKEN");
             return repository;
         }
+
+        private RequestMatcher csrfRequestMatcher = new RequestMatcher() {
+
+            // Always allow the HTTP GET method
+            // private Pattern allowedMethods = Pattern.compile("^GET$");
+
+            // Disable CSFR protection on the following urls:
+            private AntPathRequestMatcher[] requestMatchers = {
+                    new AntPathRequestMatcher("/api/key"),
+                    new AntPathRequestMatcher("/"),
+                    new AntPathRequestMatcher("/**.js"),
+                    new AntPathRequestMatcher("/**/**.js"),
+                    new AntPathRequestMatcher("/**/**.html")
+            };
+
+            @Override
+            public boolean matches(HttpServletRequest request) {
+                // If the request match one url the CSFR protection will be disabled
+                for (AntPathRequestMatcher rm : requestMatchers) {
+                    if (rm.matches(request)) { return false; }
+                }
+                return true;
+            } // method matches
+
+        }; // Sorgt dafür, dass "/api/key" ohne CSRF Protection zugänglich ist
+
+        protected static class AuthenticationConfiguration extends GlobalAuthenticationConfigurerAdapter {
+
+            @Autowired
+            private MongoUserDetailsService mongoUserDetailsService;
+
+            @Override
+            public void init(AuthenticationManagerBuilder auth) throws Exception {
+                auth.userDetailsService(mongoUserDetailsService).and()
+                        .inMemoryAuthentication()
+                        .withUser("user").password("password").roles("USER").and()
+                        .withUser("admin").password("admin").roles("ADMIN");
+            }
+
+        } // Konfiguration, damit User in der MongoDB verwaltet werden können
+
     }
+
+
+
+
 
 }

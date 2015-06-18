@@ -75,6 +75,10 @@ public class KeyService {
         return events;
     }
 
+    public long count() {
+        return keyPaarRepository.count();
+    }
+
     private static String convertToString(byte[] bytes) {
         String result = "";
         for (byte b : bytes) {

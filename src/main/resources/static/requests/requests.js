@@ -4,7 +4,7 @@
 
 
 app.factory('RequestFactory', function($resource) {
-    return $resource('/api/request/:id', { id: '@id' }); // Note the full endpoint address
+    return $resource('/api/request/:id', { id: '@id' },   { 'count': { method:'GET', url:'/api/request/count' } } ); // Note the full endpoint address
 });
 
 app.controller('requests', function($scope, RequestFactory, $modal) {
