@@ -39,6 +39,17 @@ public class SecretServerApplication {
     @Configuration
     @Order(SecurityProperties.ACCESS_OVERRIDE_ORDER)
     protected static class SecurityConfiguration extends WebSecurityConfigurerAdapter {
+
+        @Autowired
+        private MongoUserDetailsService mongoUserDetailsService;
+
+        @Autowired
+        protected void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+            auth.userDetailsService(mongoUserDetailsService).and().inMemoryAuthentication()
+                    .withUser("user").password("password").roles("USER").and()
+                    .withUser("admin").password("admin").roles("ADMIN");
+        }
+
         @Override
         protected void configure(HttpSecurity http) throws Exception {
             http
@@ -106,21 +117,6 @@ public class SecretServerApplication {
             } // method matches
 
         }; // Sorgt dafür, dass "/api/key" ohne CSRF Protection zugänglich ist
-
-        protected static class AuthenticationConfiguration extends GlobalAuthenticationConfigurerAdapter {
-
-            @Autowired
-            private MongoUserDetailsService mongoUserDetailsService;
-
-            @Override
-            public void init(AuthenticationManagerBuilder auth) throws Exception {
-                auth.userDetailsService(mongoUserDetailsService).and()
-                        .inMemoryAuthentication()
-                        .withUser("user").password("password").roles("USER").and()
-                        .withUser("admin").password("admin").roles("ADMIN");
-            }
-
-        } // Konfiguration, damit User in der MongoDB verwaltet werden können
 
     }
 

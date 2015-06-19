@@ -14,11 +14,25 @@ public class Request {
     private String id;
 
     private String initiator;
+    private int status;
+    // 1 = requested, but not approved
+    // 2 = approved
+    // 3 = copying encrypted data
+    // 4 = calculating keys
+    // 5 = decrypting
+    // 6 = done
     private ArrayList<String> approvers;
     private Date timestamp;
     private Date startDate;
     private Date endDate;
 
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
 
     public String getId() {
         return id;

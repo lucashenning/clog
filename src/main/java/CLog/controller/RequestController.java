@@ -28,7 +28,6 @@ public class RequestController {
         return requestService.getOne(id);
     }
 
-
     @RequestMapping(method = RequestMethod.POST)
     public Request add(@RequestBody Request newrequest) {
         return requestService.newRequest(newrequest); // Wandelt den neuen (unvollständigen) Request um und schickt den vollständigen zurück.
@@ -41,6 +40,11 @@ public class RequestController {
     @RequestMapping(value="/{id}", method = RequestMethod.DELETE)
     public void delete(@PathVariable String id) {
         requestService.deleteRequest(id);
+    }
+
+    @RequestMapping(value="/count", method = RequestMethod.GET)
+    public long count() {
+        return requestService.count();
     }
 
 

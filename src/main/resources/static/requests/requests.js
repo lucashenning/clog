@@ -4,12 +4,11 @@
 
 
 app.factory('RequestFactory', function($resource) {
-    return $resource('/api/request/:id', { id: '@id' },   { 'count': { method:'GET', url:'/api/request/count' } } ); // Note the full endpoint address
+    return $resource('/api/request/:id', { id: '@id' }   );
 });
 
 app.controller('requests', function($scope, RequestFactory, $modal) {
     $scope.requests = RequestFactory.query();
-
     $scope.alerts = [];
     // Close alert message
     $scope.closeAlert = function(index) {
@@ -43,12 +42,13 @@ app.controller('requests', function($scope, RequestFactory, $modal) {
 
 });
 
-app.controller('requestModal', function($scope, $modalInstance, request, RequestFactory, requests) {
+app.controller('requestModal', function($scope, $rootScope, $modalInstance, request, RequestFactory, requests) {
     if (angular.isDefined(request)) {
         $scope.request = request;
         $scope.newrequest = false;
     } else {
         $scope.request = new RequestFactory;
+        $scope.request.initiator = $rootScope.username;
         $scope.newrequest = true;
     }
 

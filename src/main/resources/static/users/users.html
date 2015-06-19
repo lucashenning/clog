@@ -1,0 +1,37 @@
+<div ng-controller="users" ng-cloak class="ng-cloak">
+<h1>Users</h1>
+<alert ng-repeat="alert in alerts" type="alert.type" close="closeAlert($index)">{{alert.msg}}</alert>
+
+<section>
+    <div class="input-group">
+        <input type="text" ng-model="search" class="search-query pull-left form-control" placeholder="Suche...">
+        <span class="input-group-btn"><button class="btn btn-default" type="button">Go!</button></span>
+        <button ng-click="openModal()" class="btn btn-primary pull-right"><i class="icon-white icon-plus"></i> User hinzufügen</button>
+    </div>
+</section>
+
+<table ng-table="tableParams" class="table table-striped">
+    <thead>
+    <tr>
+        <th>Id</th>
+        <th>Username</th>
+        <th>First Name</th>
+        <th>Last Name</th>
+        <th>Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr ng-repeat="user in users | filter:search | orderBy:'timestamp'">
+        <td data-title="'Id'">{{user.id}}</td>
+        <td data-title="'Initiator'">{{user.username}}</td>
+        <td data-title="'FirstName'">{{user.firstName}}</td>
+        <td data-title="'LastName'">{{user.lastName}}</td>
+        <td data-title="'Actions'">
+            <a href="" ng-click="approve()" class="btn btn-success btn-xs" >Approve</a>
+            <a href="" ng-click="openModal(user)" class="btn btn-primary btn-xs" >Edit</a>
+            <a href="" ng-click="removeRecord($index)" class="btn btn-default btn-xs" >Delete</a>
+        </td>
+    </tr>
+    </tbody>
+</table>
+</div>

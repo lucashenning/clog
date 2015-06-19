@@ -1,0 +1,43 @@
+<div class="modal-header">
+    <button ng-click="closeModal()" type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    <h4 class="modal-title">User bearbeiten</h4>
+</div>
+<div class="modal-body">
+
+
+
+
+    <form name="myForm">
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input ng-model="user.username" type="text" class="form-control" id="username" />
+        </div>
+
+        <div class="form-group">
+            <label for="firstName">Vorname</label>
+            <input id="firstName" name="firstName" type="text" ng-model="user.firstName" class="form-control" required />
+            <span ng-show="myForm.firstName.$error.required">Vorname erforderlich.</span>
+        </div>
+
+        <div class="form-group">
+            <label for="lastName">Nachname</label>
+            <input id="lastName" name="lastName" type="text" ng-model="user.lastName" class="form-control" required />
+            <span ng-show="myForm.lastName.$error.required">Nachname erforderlich.</span>
+        </div>
+
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input id="password" name="password" type="password" ng-model="user.password" class="form-control" required />
+            <span ng-show="myForm.password.$error.required">Passwort erforderlich.</span>
+        </div>
+    </form>
+
+
+
+
+</div>
+<div class="modal-footer">
+    <button ng-click="closeModal()" type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+    <button ng-click="saveModal()" type="button" class="btn btn-primary" ng-disabled="myForm.startDate.$error.required || myForm.endDate.$error.required">Speichern!</button>
+</div>
+</div><!-- /.modal-content -->

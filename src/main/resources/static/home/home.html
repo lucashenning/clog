@@ -1,4 +1,15 @@
-<h1>Welcome to Clog.</h1>
-<div ng-show="!authenticated" ng-controller="home" ng-cloak class="ng-cloak">
-    <p>Please login to access any interesting things.</p>
+<div  ng-controller="home" ng-cloak class="ng-cloak">
+    <div ng-show="!authenticated">
+        <div class="jumbotron"><h1>Welcome to cLog...</h1>
+            <p>Please login to access any interesting things.</p>
+        </div>
+    </div>
+    <div ng-show="authenticated">
+        <div class="jumbotron"><h1>Welcome to Clog.</h1>
+            <p>Eingeloggt als {{username}}.</p>
+        </div>
+        <p>Anzahl Requests: {{countRequests}}</p>
+        <p>Anzahl Events: {{countEvents}}</p>
+        <p>Anzahl User: {{countUser}}</p>
+    </div>
 </div>

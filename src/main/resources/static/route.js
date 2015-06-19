@@ -10,6 +10,8 @@ app.config(function ($routeProvider, $httpProvider) {
             templateUrl: "requests/requests.html"
         }).when("/events", {
             templateUrl: "events/events.html"
+        }).when("/users", {
+            templateUrl: "users/users.html"
         }).otherwise({
             redirectTo: "/"
         });

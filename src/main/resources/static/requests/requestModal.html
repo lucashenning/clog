@@ -7,20 +7,22 @@
 
 
 
-    <form>
+    <form name="myForm">
         <div class="form-group">
             <label for="initiator">Initiator</label>
-            <input ng-model="request.initiator" ng-class="{error: request.initiator.$invalid && !request.initiator.$pristine}" type="text" class="form-control" id="initiator" placeholder="Initiator">
+            <input ng-model="request.initiator" type="text" class="form-control" id="initiator" disabled />
         </div>
 
         <div class="form-group">
             <label for="startDate">Start Datum</label>
-            <input id="startDate" name="startDate" type="date" ng-model="request.startDate" class="form-control" />
+            <input id="startDate" name="startDate" type="date" ng-model="request.startDate" class="form-control" required />
+            <span ng-show="myForm.startDate.$error.required">Bitte ein gültiges Start Datum eingeben.</span>
         </div>
 
         <div class="form-group">
             <label for="endDate">Ende Datum</label>
-            <input id="endDate" name="endDate" type="date" ng-model="request.endDate" class="form-control" />
+            <input id="endDate" name="endDate" type="date" ng-model="request.endDate" class="form-control" required />
+            <span ng-show="myForm.endDate.$error.required">Bitte ein gültiges Ende Datum eingeben.</span>
         </div>
     </form>
 
@@ -30,6 +32,6 @@
 </div>
 <div class="modal-footer">
     <button ng-click="closeModal()" type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-    <button ng-click="saveModal()" type="button" class="btn btn-primary">Speichern!</button>
+    <button ng-click="saveModal()" type="button" class="btn btn-primary" ng-disabled="myForm.startDate.$error.required || myForm.endDate.$error.required">Speichern!</button>
 </div>
 </div><!-- /.modal-content -->

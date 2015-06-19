@@ -1,11 +1,12 @@
 package CLog.services;
 
 import CLog.entities.Request;
+import CLog.entities.User;
 import CLog.repositories.RequestRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -25,7 +26,8 @@ public class RequestService {
         } else {
             Request request = new Request();
             request.setTimestamp(preRequest.getTimestamp());
-            request.setInitiator(preRequest.getInitiator());
+            //String user = (User) SecurityContextHolder.getContext().getAuthentication().getDetails(); // Aktuell eingeloggten User holen
+            request.setInitiator(SecurityContextHolder.getContext().getAuthentication().getName());
             request.setStartDate(preRequest.getStartDate());
             request.setEndDate(preRequest.getEndDate());
             request.setTimestamp(new Date());
@@ -44,6 +46,10 @@ public class RequestService {
     public void deleteRequest(String id) {
         Request c = requestRepository.findOne(id);
         requestRepository.delete(c);
+    }
+
+    public long count() {
+        return requestRepository.count();
     }
 
 }
