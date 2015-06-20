@@ -4,11 +4,20 @@
 
 
 app.factory('RequestFactory', function($resource) {
-    return $resource('/api/request/:id', { id: '@id' }   );
+    return $resource('/api/request/:id', { id: '@id' }, {
+        approve: {method: 'POST', params: { approve: true } }
+    });
 });
 
-app.controller('requests', function($scope, RequestFactory, $modal) {
+app.controller('requests', function($scope, RequestFactory, $modal, $filter) {
     $scope.requests = RequestFactory.query();
+
+    angular.forEach($scope.requests, function (request) {
+        var startdateAsString = $filter('date')(request.startDate, "dd.MM.yyyy");
+        var enddateAsString = $filter('date')(request.endDate, "dd.MM.yyyy");
+        request.daterange = startdateAsString + " - " + enddateAsString;
+    });
+
     $scope.alerts = [];
     // Close alert message
     $scope.closeAlert = function(index) {
@@ -30,6 +39,13 @@ app.controller('requests', function($scope, RequestFactory, $modal) {
         })
     }
 
+    $scope.approve = function (request) {
+        request.$approve( {}, function(response) {
+            $scope.alerts.splice(0, 1);
+            $scope.alerts.push(response);
+        });
+    }
+
     $scope.removeRecord = function(index) {
         $scope.requests[index].$remove(); //remove from Factory
         $scope.requests.splice(index,1); // remove from DOM
@@ -48,7 +64,9 @@ app.controller('requestModal', function($scope, $rootScope, $modalInstance, requ
         $scope.newrequest = false;
     } else {
         $scope.request = new RequestFactory;
-        $scope.request.initiator = $rootScope.username;
+        $scope.request.initiator = {
+            username : $rootScope.username
+        }
         $scope.newrequest = true;
     }
 

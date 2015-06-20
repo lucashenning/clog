@@ -13,7 +13,7 @@ public class Request {
     @Id
     private String id;
 
-    private String initiator;
+    private User initiator;
     private int status;
     // 1 = requested, but not approved
     // 2 = approved
@@ -21,10 +21,19 @@ public class Request {
     // 4 = calculating keys
     // 5 = decrypting
     // 6 = done
-    private ArrayList<String> approvers;
+    private ArrayList<Approval> approvals;
     private Date timestamp;
     private Date startDate;
     private Date endDate;
+    private String comment;
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
+    }
 
     public int getStatus() {
         return status;
@@ -42,20 +51,20 @@ public class Request {
         this.id = id;
     }
 
-    public String getInitiator() {
+    public User getInitiator() {
         return initiator;
     }
 
-    public void setInitiator(String initiator) {
+    public void setInitiator(User initiator) {
         this.initiator = initiator;
     }
 
-    public ArrayList<String> getApprovers() {
-        return approvers;
+    public ArrayList<Approval> getApprovals() {
+        return approvals;
     }
 
-    public void setApprovers(ArrayList<String> approvers) {
-        this.approvers = approvers;
+    public void setApprovals(ArrayList<Approval> approvals) {
+        this.approvals = approvals;
     }
 
     public Date getTimestamp() {

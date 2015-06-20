@@ -71,4 +71,8 @@ public class UserService {
         return userRepository.count();
     }
 
+    public User findUserByUsername(String username) {
+        return userRepository.findByUsername(username);
+    }
+
 }

@@ -5,7 +5,9 @@ import CLog.services.RequestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by l.henning on 16.06.2015.
@@ -32,9 +34,10 @@ public class RequestController {
     public Request add(@RequestBody Request newrequest) {
         return requestService.newRequest(newrequest); // Wandelt den neuen (unvollständigen) Request um und schickt den vollständigen zurück.
     }
+
     @RequestMapping(value="/{id}", method = RequestMethod.POST)
     public Request save(@RequestBody Request request) {
-        return requestService.newRequest(request); // Speichert den Request
+        return requestService.editRequest(request); // Speichert den Request
     }
 
     @RequestMapping(value="/{id}", method = RequestMethod.DELETE)
@@ -45,6 +48,11 @@ public class RequestController {
     @RequestMapping(value="/count", method = RequestMethod.GET)
     public long count() {
         return requestService.count();
+    }
+
+    @RequestMapping(value="/{id}", method = RequestMethod.POST, params = "approve=true")
+    public Map<String,Object> approve(@PathVariable String id) {
+        return requestService.approve(id);
     }
 
 

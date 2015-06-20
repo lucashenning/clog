@@ -10,20 +10,38 @@
     <form name="myForm">
         <div class="form-group">
             <label for="initiator">Initiator</label>
-            <input ng-model="request.initiator" type="text" class="form-control" id="initiator" disabled />
+            <input ng-model="request.initiator['username']" type="text" class="form-control" id="initiator" disabled />
+        </div>
+
+
+        <div class="form-group">
+            <label for="startDate">Zeitraum</label>
+            <input dateformat ng-model="request.startDate" id="startDate" type="text" name="startDate" class="form-control" required />
+            bis
+            <input dateformat ng-model="request.endDate" id="endDate" type="text" name="endDate" class="form-control" required />
+            <script type="text/javascript">
+                $(function() {
+                    $('input[name="startDate"]').daterangepicker({
+                        timePicker: false,
+                        format: 'DD.MM.YYYY',
+                        singleDatePicker: true
+                    });
+                });
+                $(function() {
+                    $('input[name="endDate"]').daterangepicker({
+                        timePicker: false,
+                        format: 'DD.MM.YYYY',
+                        singleDatePicker: true
+                    });
+                });
+            </script>
         </div>
 
         <div class="form-group">
-            <label for="startDate">Start Datum</label>
-            <input id="startDate" name="startDate" type="date" ng-model="request.startDate" class="form-control" required />
-            <span ng-show="myForm.startDate.$error.required">Bitte ein gültiges Start Datum eingeben.</span>
+            <label for="comment">Kommentar</label>
+            <textarea ng-model="request.comment" type="text" class="form-control" id="comment"></textarea>
         </div>
 
-        <div class="form-group">
-            <label for="endDate">Ende Datum</label>
-            <input id="endDate" name="endDate" type="date" ng-model="request.endDate" class="form-control" required />
-            <span ng-show="myForm.endDate.$error.required">Bitte ein gültiges Ende Datum eingeben.</span>
-        </div>
     </form>
 
 

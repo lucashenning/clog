@@ -56,7 +56,7 @@ public class SecretServerApplication {
                 .httpBasic()
             .and()
                 .authorizeRequests()
-                    .antMatchers("/", "/**.js", "/**/**.js", "/**/**.html").permitAll().anyRequest()
+                    .antMatchers("/", "/**.js", "/**/**.js", "/**/**.html", "/**.css", "/**/**.css").permitAll().anyRequest()
                     .authenticated()
             .and()
                     .csrf().requireCsrfProtectionMatcher(csrfRequestMatcher).and().csrf()
@@ -104,7 +104,9 @@ public class SecretServerApplication {
                     new AntPathRequestMatcher("/"),
                     new AntPathRequestMatcher("/**.js"),
                     new AntPathRequestMatcher("/**/**.js"),
-                    new AntPathRequestMatcher("/**/**.html")
+                    new AntPathRequestMatcher("/**/**.html"),
+                    new AntPathRequestMatcher("/**.css"),
+                    new AntPathRequestMatcher("/**/**.css")
             };
 
             @Override

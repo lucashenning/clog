@@ -1,5 +1,6 @@
 package CLog.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.data.annotation.Id;
 import org.springframework.security.core.GrantedAuthority;
@@ -20,6 +21,7 @@ public class User  {
     private String firstName;
     private String lastName;
 
+    @JsonIgnore
     public String getPassword() {
         return password;
     }
