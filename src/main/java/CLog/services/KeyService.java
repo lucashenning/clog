@@ -9,11 +9,9 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
+import java.security.*;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 
@@ -31,8 +29,8 @@ public class KeyService {
 
     public KeyPaar generateKeyPaar() {
         KeyPair keyPair = null;
-        String pub = null;
-        String priv = null;
+        PublicKey pub = null;
+        PrivateKey priv = null;
         try {
 
             KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
@@ -40,13 +38,12 @@ public class KeyService {
             keyPairGenerator.initialize(2048, random);
 
             keyPair = keyPairGenerator.generateKeyPair();
-            pub = convertToString(keyPair.getPublic().getEncoded());
-            priv = convertToString(keyPair.getPrivate().getEncoded());
+            pub = keyPair.getPublic();
+            priv = keyPair.getPrivate();
 
         } catch (NoSuchAlgorithmException e) {
             log.warn("Hier ist aber mächtig was schief gegangen", e);
         }
-
 
         // KeyPaar für die DB erzeugen und speichern
         Date timestamp = new Date();
@@ -58,7 +55,8 @@ public class KeyService {
     public static PubKeyDTO getPubKey(KeyPaar keyPaar) {
         PubKeyDTO pubKeyDTO = new PubKeyDTO();
         pubKeyDTO.setId(keyPaar.getId());
-        pubKeyDTO.setPubKey(keyPaar.getPub());
+        pubKeyDTO.setPubKey(Base64.getEncoder().encodeToString(keyPaar.getPub().getEncoded()));
+        log.warn("PubKeyDTO wird ausgegeben. PubKey: "+pubKeyDTO.getPubKey());
         return pubKeyDTO;
     }
 
@@ -68,7 +66,7 @@ public class KeyService {
         for (KeyPaar keyPaar : keyPaars) {
             EventDTO current = new EventDTO();
             current.setId(keyPaar.getId());
-            current.setPubKey(keyPaar.getPub());
+            current.setPubKey(Base64.getEncoder().encodeToString(keyPaar.getPub().getEncoded()));
             current.setTimestamp(keyPaar.getTimestamp());
             events.add(current);
         }
@@ -77,14 +75,6 @@ public class KeyService {
 
     public long count() {
         return keyPaarRepository.count();
-    }
-
-    private static String convertToString(byte[] bytes) {
-        String result = "";
-        for (byte b : bytes) {
-            result += String.valueOf(b);
-        }
-        return result;
     }
 
 }

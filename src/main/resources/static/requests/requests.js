@@ -28,6 +28,9 @@ app.controller('requests', function($scope, RequestFactory, $modal, $filter) {
                 },
                 requests: function () {
                     return $scope.requests;
+                },
+                alerts: function () {
+                    return $scope.alerts;
                 }
             }
         })
@@ -52,7 +55,7 @@ app.controller('requests', function($scope, RequestFactory, $modal, $filter) {
 
 });
 
-app.controller('requestModal', function($scope, $rootScope, $modalInstance, request, RequestFactory, requests) {
+app.controller('requestModal', function($scope, $rootScope, $modalInstance, request, RequestFactory, requests, alerts) {
     if (angular.isDefined(request)) {
         $scope.request = request;
         $scope.newrequest = false;
@@ -71,6 +74,10 @@ app.controller('requestModal', function($scope, $rootScope, $modalInstance, requ
     $scope.saveModal = function () {
         $scope.request.$save();
         requests.push($scope.request);
+        alerts.push({
+            msg: "Neuer Request erfolgreich angelegt.",
+            type: "success"
+        });
         $modalInstance.close();
     }
 

@@ -2,6 +2,8 @@ package CLog.entities;
 
 import org.springframework.data.annotation.Id;
 
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.util.Date;
 
 /**
@@ -13,10 +15,10 @@ public class KeyPaar {
     private String id;
 
     private Date timestamp;
-    private String pub;
-    private String priv;
+    private PublicKey pub;
+    private PrivateKey priv;
 
-    public KeyPaar(Date timestamp, String pub, String priv) {
+    public KeyPaar(Date timestamp, PublicKey pub, PrivateKey priv) {
         this.timestamp = timestamp;
         this.pub = pub;
         this.priv = priv;
@@ -38,19 +40,19 @@ public class KeyPaar {
         this.timestamp = timestamp;
     }
 
-    public String getPub() {
+    public PublicKey getPub() {
         return pub;
     }
 
-    public void setPub(String pub) {
+    public void setPub(PublicKey pub) {
         this.pub = pub;
     }
 
-    public String getPriv() {
+    public PrivateKey getPriv() {
         return priv;
     }
 
-    public void setPriv(String priv) {
+    public void setPriv(PrivateKey priv) {
         this.priv = priv;
     }
 }
