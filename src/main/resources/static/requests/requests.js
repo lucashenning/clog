@@ -12,12 +12,6 @@ app.factory('RequestFactory', function($resource) {
 app.controller('requests', function($scope, RequestFactory, $modal, $filter) {
     $scope.requests = RequestFactory.query();
 
-    angular.forEach($scope.requests, function (request) {
-        var startdateAsString = $filter('date')(request.startDate, "dd.MM.yyyy");
-        var enddateAsString = $filter('date')(request.endDate, "dd.MM.yyyy");
-        request.daterange = startdateAsString + " - " + enddateAsString;
-    });
-
     $scope.alerts = [];
     // Close alert message
     $scope.closeAlert = function(index) {
