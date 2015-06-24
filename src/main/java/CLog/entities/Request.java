@@ -21,7 +21,7 @@ public class Request {
     // 4 = calculating keys
     // 5 = decrypting
     // 6 = done
-    private ArrayList<Approval> approvals;
+    private ArrayList<Approval> approvals = new ArrayList<>();
     private Date timestamp;
     private Date startDate;
     private Date endDate;

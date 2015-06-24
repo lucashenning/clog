@@ -29,8 +29,8 @@ public class KeyService {
 
     public KeyPaar generateKeyPaar() {
         KeyPair keyPair = null;
-        PublicKey pub = null;
-        PrivateKey priv = null;
+        String pub = null;
+        String priv = null;
         try {
 
             KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
@@ -38,8 +38,8 @@ public class KeyService {
             keyPairGenerator.initialize(2048, random);
 
             keyPair = keyPairGenerator.generateKeyPair();
-            pub = keyPair.getPublic();
-            priv = keyPair.getPrivate();
+            pub = Base64.getEncoder().encodeToString(keyPair.getPublic().getEncoded());
+            priv = Base64.getEncoder().encodeToString(keyPair.getPrivate().getEncoded());
 
         } catch (NoSuchAlgorithmException e) {
             log.warn("Hier ist aber mächtig was schief gegangen", e);
@@ -55,7 +55,7 @@ public class KeyService {
     public static PubKeyDTO getPubKey(KeyPaar keyPaar) {
         PubKeyDTO pubKeyDTO = new PubKeyDTO();
         pubKeyDTO.setId(keyPaar.getId());
-        pubKeyDTO.setPubKey(Base64.getEncoder().encodeToString(keyPaar.getPub().getEncoded()));
+        pubKeyDTO.setPubKey(keyPaar.getPub());
         log.warn("PubKeyDTO wird ausgegeben. PubKey: "+pubKeyDTO.getPubKey());
         return pubKeyDTO;
     }
@@ -66,7 +66,7 @@ public class KeyService {
         for (KeyPaar keyPaar : keyPaars) {
             EventDTO current = new EventDTO();
             current.setId(keyPaar.getId());
-            current.setPubKey(Base64.getEncoder().encodeToString(keyPaar.getPub().getEncoded()));
+            current.setPubKey(keyPaar.getPub());
             current.setTimestamp(keyPaar.getTimestamp());
             events.add(current);
         }

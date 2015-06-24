@@ -68,11 +68,11 @@ public class RequestService {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String name = auth.getName(); //get logged in username
         User user = userService.findUserByUsername(name);
-        if (user != request.getInitiator()) {
+        if (user == request.getInitiator()) {
             map.put("type", "danger");
             map.put("msg","Request could not be approved by initiator. ");
             return map;
-        } else if ( !request.getApprovals().contains(user) ) {
+        } else if ( request.getApprovals() != null && request.getApprovals().contains(user) ) {
             map.put("type", "danger");
             map.put("msg","Can not approve request. This request is already approved by "+user.getUsername());
             return map;

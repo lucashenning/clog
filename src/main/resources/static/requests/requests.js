@@ -53,6 +53,14 @@ app.controller('requests', function($scope, RequestFactory, $modal, $filter) {
         });
     }
 
+    $scope.getApprovals = function (request) {
+        if (request.approvals != null) {
+            return 1 + request.approvals.length
+        } else {
+            return 1
+        }
+    };
+
 });
 
 app.controller('requestModal', function($scope, $rootScope, $modalInstance, request, RequestFactory, requests, alerts) {

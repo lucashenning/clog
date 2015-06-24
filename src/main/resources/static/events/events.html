@@ -1,5 +1,7 @@
+<div ng-controller="events" ng-cloak class="ng-cloak">
 <h1>Events</h1>
 <h3>Each event corresponds to an encrypted log entry.</h3>
+<alert ng-repeat="alert in alerts" type="{{alert.type}}" close="closeAlert($index)">{{alert.msg}}</alert>
 <section>
     <div class="input-group">
         <input type="text" ng-model="search" class="search-query pull-left form-control" placeholder="Suche...">
@@ -8,20 +10,23 @@
         </span>
     </div>
 </section>
-<div ng-controller="events" ng-cloak class="ng-cloak">
     <table class="table table-striped" style="overflow: hidden; text-overflow: ellipsis">
         <thead>
         <tr>
             <th>Timestamp</th>
             <th>Id</th>
             <th>PubKey</th>
+            <th>Action</th>
         </tr>
         </thead>
         <tbody>
         <tr ng-repeat="event in events | filter:search | orderBy:'timestamp'">
-            <td data-title="'Timestamp'" width="100">{{event.timestamp | date:"MM/dd/yyyy 'at' h:mma"}}</td>
-            <td data-title="'Id'" width="100">{{event.id}}</td>
-            <td data-title="'PubKey'">{{event.pubKey}}</td>
+            <td data-title="'Timestamp'">{{event.timestamp | date:"MM/dd/yyyy 'at' h:mma"}}</td>
+            <td data-title="'Id'">{{event.id}}</td>
+            <td data-title="'PubKey'" class="col-md-3">{{event.pubKey}}</td>
+            <td data-title="'Actions'">
+                <a href="" ng-click="decrypt(event)" class="btn btn-success btn-xs" >Decrypt</a>
+            </td>
         </tr>
         </tbody>
     </table>

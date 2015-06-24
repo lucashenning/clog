@@ -15,10 +15,10 @@ public class KeyPaar {
     private String id;
 
     private Date timestamp;
-    private PublicKey pub;
-    private PrivateKey priv;
+    private String pub;
+    private String priv;
 
-    public KeyPaar(Date timestamp, PublicKey pub, PrivateKey priv) {
+    public KeyPaar(Date timestamp, String pub, String priv) {
         this.timestamp = timestamp;
         this.pub = pub;
         this.priv = priv;
@@ -40,19 +40,19 @@ public class KeyPaar {
         this.timestamp = timestamp;
     }
 
-    public PublicKey getPub() {
+    public String getPub() {
         return pub;
     }
 
-    public void setPub(PublicKey pub) {
+    public void setPub(String pub) {
         this.pub = pub;
     }
 
-    public PrivateKey getPriv() {
+    public String getPriv() {
         return priv;
     }
 
-    public void setPriv(PrivateKey priv) {
+    public void setPriv(String priv) {
         this.priv = priv;
     }
 }

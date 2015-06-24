@@ -7,4 +7,19 @@ app.controller('events', function($scope, $http) {
         success(function(data) {
             $scope.events = data;
         });
+
+    $scope.alerts = [];
+    // Close alert message
+    $scope.closeAlert = function(index) {
+        $scope.alerts.splice(index, 1);
+    };
+
+    $scope.decrypt = function (event) {
+        $http.get('/api/key/decrypt/'+event.id).
+            success(function(data) {
+                $scope.alerts.push(data);
+            });
+    }
+
+
 });
