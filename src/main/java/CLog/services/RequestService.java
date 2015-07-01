@@ -38,6 +38,7 @@ public class RequestService {
         request.setStartDate(preRequest.getStartDate());
         request.setEndDate(preRequest.getEndDate());
         request.setTimestamp(new Date());
+        request.setStatus(1); // 1 = new request, not approved
         return requestRepository.save(request);
     }
 
@@ -68,21 +69,31 @@ public class RequestService {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String name = auth.getName(); //get logged in username
         User user = userService.findUserByUsername(name);
-        if (user == request.getInitiator()) {
-            map.put("type", "danger");
-            map.put("msg","Request could not be approved by initiator. ");
-            return map;
-        } else if ( request.getApprovals() != null && request.getApprovals().contains(user) ) {
-            map.put("type", "danger");
-            map.put("msg","Can not approve request. This request is already approved by "+user.getUsername());
-            return map;
+        if (request.getStatus() == 1) {
+            if (user == request.getInitiator()) {
+                map.put("type", "danger");
+                map.put("msg", "Request could not be approved by initiator. ");
+                return map;
+            } else if (request.hasApprover(user)) {
+                map.put("type", "danger");
+                map.put("msg", "Can not approve request. This request is already approved by " + user.getUsername());
+                return map;
+            } else {
+                Approval approval = new Approval();
+                approval.setApprover(user);
+                approval.setTimestamp(new Date());
+                request.getApprovals().add(approval);
+                if (request.getApprovals().size() == 2) {
+                    request.setStatus(2); // Status = approved
+                }
+                requestRepository.save(request);
+                map.put("type", "success");
+                map.put("msg", "Request approved!");
+                return map;
+            }
         } else {
-            Approval approval = new Approval();
-            approval.setApprover(user);
-            approval.setTimestamp(new Date());
-            request.getApprovals().add(approval);
-            map.put("type", "success");
-            map.put("msg","Request approved!");
+            map.put("type", "danger");
+            map.put("msg", "Request is already approved or closed.");
             return map;
         }
     }

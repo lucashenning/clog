@@ -91,5 +91,13 @@ public class Request {
         this.endDate = endDate;
     }
 
+    public boolean hasApprover (User user) {
+        for (Approval app : this.approvals) {
+            if (app.getApprover().getUsername().equals(user.getUsername())) {
+                return true;
+            }
+        }
+        return false;
+    }
 
 }

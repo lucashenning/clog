@@ -38,4 +38,5 @@ public class Approval {
     public void setTimestamp(Date timestamp) {
         this.timestamp = timestamp;
     }
+
 }

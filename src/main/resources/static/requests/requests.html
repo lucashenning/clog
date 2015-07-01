@@ -25,13 +25,14 @@
     <tr >
         <td><i class="glyphicon glyphicon glyphicon-triangle-right" aria-hidden="true"></i></td>
         <td data-title="'Status'">
-            <progressbar ng-show="request.status == 0" class="progress" value="getApprovals(request)" max="3" type="warning">{{getApprovals(request)}} / 3</progressbar>
+            <progressbar ng-show="request.status == 1" class="progress" value="getApprovals(request)" max="3" type="warning">{{getApprovals(request)}} / 3</progressbar>
+            <progressbar ng-show="request.status == 2" class="progress" value="" max="100" type="success">Approved...</progressbar>
         </td>
         <td data-title="'Initiator'">{{request.initiator['username']}}</td>
         <td data-title="'Created'">{{request.timestamp | date:"dd.MM.yyyy"}}</td>
         <td data-title="'Zeitraum'">{{request.startDate | date:"dd.MM.yyyy"}} bis {{request.endDate | date:"dd.MM.yyyy"}}</td>
         <td data-title="'Actions'">
-            <a href="" ng-show="request.initiator['username'] != username" ng-click="approve(request)" class="btn btn-success btn-xs" >Approve</a>
+            <a href="" ng-show="request.initiator['username'] != username && request.status == 1" ng-click="approve(request)" class="btn btn-success btn-xs" >Approve</a>
             <a href="" ng-show="request.initiator['username'] == username" ng-click="openModal(request)" class="btn btn-primary btn-xs" >Edit</a>
             <a href="" ng-show="request.initiator['username'] == username" ng-really-message="Do you really want to delete this request?" ng-really-click="removeRecord($index)" class="btn btn-default btn-xs" >Delete</a>
         </td>
@@ -41,7 +42,7 @@
         <td colspan="5" class="hiddenRow"><div class="accordion-body collapse" id="{{request.id}}">
             <div class="row">
                 <div class="col-sm-3"><b>ID:</b><p>{{request.id}}</p></div>
-                <div class="col-sm-3"><b>Approvals:</b><p ng-repeat="approval in request.approvals">{{approval.id}}</p></div>
+                <div class="col-sm-3"><b>Approvals:</b><p ng-repeat="approval in request.approvals">{{approval.approver['username']}} ({{approval.timestamp | date:"dd.MM.yyyy"}})</p></div>
                 <div class="col-sm-3"><b>Comment:</b><p>{{request.comment}}</p></div>
             </div>
         </div></td>

@@ -21,6 +21,7 @@ app.controller('navigation',
                 callback && callback();
             }).error(function() {
                 $rootScope.authenticated = false;
+                $location.path("/");
                 callback && callback();
             });
 

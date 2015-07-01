@@ -10,7 +10,7 @@
         </span>
     </div>
 </section>
-    <table class="table table-striped" style="overflow: hidden; text-overflow: ellipsis">
+    <table class="table table-striped" style="table-layout: fixed; width: 100%;">
         <thead>
         <tr>
             <th>Timestamp</th>
@@ -23,7 +23,7 @@
         <tr ng-repeat="event in events | filter:search | orderBy:'timestamp'">
             <td data-title="'Timestamp'">{{event.timestamp | date:"MM/dd/yyyy 'at' h:mma"}}</td>
             <td data-title="'Id'">{{event.id}}</td>
-            <td data-title="'PubKey'" class="col-md-3">{{event.pubKey}}</td>
+            <td data-title="'PubKey'" style="word-wrap: break-word;">{{event.pubKey}}</td>
             <td data-title="'Actions'">
                 <a href="" ng-click="decrypt(event)" class="btn btn-success btn-xs" >Decrypt</a>
             </td>
