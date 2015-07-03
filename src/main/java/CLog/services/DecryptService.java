@@ -1,6 +1,7 @@
 package CLog.services;
 
 import CLog.entities.KeyPaar;
+import CLog.repositories.DecryptedLogRepository;
 import CLog.repositories.KeyPaarRepository;
 import CLog.repositories.LogRepository;
 import org.apache.commons.logging.Log;
@@ -34,6 +35,9 @@ public class DecryptService {
     @Autowired
     private KeyPaarRepository keyPaarRepository;
 
+    @Autowired
+    private DecryptedLogRepository decryptedLogRepository;
+
     public String decrypt(String id) {
         Map<String,Object> map = logRepository.findOne(id);
         log.warn("Object received from remote MongoDB: "+map);
@@ -60,6 +64,10 @@ public class DecryptService {
             aes.init(Cipher.DECRYPT_MODE, new SecretKeySpec(session_key, "AES"), new IvParameterSpec(iv, 0, aes.getBlockSize()));
             String plaintext = new String(aes.doFinal(ciphertext));
             log.warn("AES Result: "+plaintext);
+
+            // Write to Elastic
+            log.warn(decryptedLogRepository.add(plaintext).isCreated());
+
             return plaintext;
 
         } catch (NoSuchAlgorithmException e) {

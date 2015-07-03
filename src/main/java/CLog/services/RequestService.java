@@ -38,6 +38,7 @@ public class RequestService {
         request.setStartDate(preRequest.getStartDate());
         request.setEndDate(preRequest.getEndDate());
         request.setTimestamp(new Date());
+        request.setComment(preRequest.getComment());
         request.setStatus(1); // 1 = new request, not approved
         return requestRepository.save(request);
     }
@@ -96,6 +97,11 @@ public class RequestService {
             map.put("msg", "Request is already approved or closed.");
             return map;
         }
+    }
+
+    public boolean execute(Request request) {
+
+        return true;
     }
 
 }
