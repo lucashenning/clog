@@ -15,6 +15,15 @@ public class EventDTO {
 
     private String pubKey;
     private Date timestamp;
+    private int numberOfDecayedBits;
+
+    public int getNumberOfDecayedBits() {
+        return numberOfDecayedBits;
+    }
+
+    public void setNumberOfDecayedBits(int numberOfDecayedBits) {
+        this.numberOfDecayedBits = numberOfDecayedBits;
+    }
 
     public Date getTimestamp() {   return timestamp;   }
 

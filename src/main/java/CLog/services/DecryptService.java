@@ -33,7 +33,7 @@ public class DecryptService {
     private LogRepository logRepository;
 
     @Autowired
-    private KeyPaarRepository keyPaarRepository;
+    private KeyService keyService;
 
     @Autowired
     private DecryptedLogRepository decryptedLogRepository;
@@ -51,8 +51,7 @@ public class DecryptService {
 
         try {
             // RSA Decrypt to get Session Key
-            KeyPaar keyPaar = keyPaarRepository.findOne(id);
-            byte[] privKeyInBytes = Base64.getDecoder().decode(keyPaar.getPriv());
+            byte[] privKeyInBytes = keyService.getPrivKeyInBytes(id);
             Cipher rsa = Cipher.getInstance("RSA");
             PrivateKey privateKey =  KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(privKeyInBytes));
             rsa.init(Cipher.DECRYPT_MODE, privateKey);

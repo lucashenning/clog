@@ -4,6 +4,7 @@ import org.springframework.data.annotation.Id;
 
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.util.BitSet;
 import java.util.Date;
 
 /**
@@ -15,13 +16,15 @@ public class KeyPaar {
     private String id;
 
     private Date timestamp;
-    private String pub;
-    private String priv;
+    private BitSet pub;
+    private BitSet priv;
+    private BitSet decayVector;
 
-    public KeyPaar(Date timestamp, String pub, String priv) {
+    public KeyPaar(Date timestamp, BitSet pub, BitSet priv, BitSet decayVector) {
         this.timestamp = timestamp;
         this.pub = pub;
         this.priv = priv;
+        this.decayVector = decayVector;
     }
 
     public String getId() {
@@ -40,19 +43,27 @@ public class KeyPaar {
         this.timestamp = timestamp;
     }
 
-    public String getPub() {
+    public BitSet getPub() {
         return pub;
     }
 
-    public void setPub(String pub) {
+    public void setPub(BitSet pub) {
         this.pub = pub;
     }
 
-    public String getPriv() {
+    public BitSet getPriv() {
         return priv;
     }
 
-    public void setPriv(String priv) {
+    public void setPriv(BitSet priv) {
         this.priv = priv;
+    }
+
+    public BitSet getDecayVector() {
+        return decayVector;
+    }
+
+    public void setDecayVector(BitSet decayVector) {
+        this.decayVector = decayVector;
     }
 }

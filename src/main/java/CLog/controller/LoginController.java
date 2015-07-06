@@ -15,5 +15,5 @@ public class LoginController {
     @RequestMapping(method = RequestMethod.GET)
     public Principal user(Principal user) {
         return user;
-    }
+    } // returns an user object which is used by angularJS to determine if a login is successful
 }

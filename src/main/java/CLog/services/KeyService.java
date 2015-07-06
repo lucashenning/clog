@@ -10,10 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.security.*;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 
 /**
@@ -28,26 +25,29 @@ public class KeyService {
     private KeyPaarRepository keyPaarRepository;
 
     public KeyPaar generateKeyPaar() {
-        KeyPair keyPair = null;
-        String pub = null;
-        String priv = null;
+        BitSet pub = null;
+        BitSet priv = null;
         try {
 
             KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
-            SecureRandom random = SecureRandom.getInstanceStrong();
-            keyPairGenerator.initialize(2048, random);
+            // Don't need this because keyPairGenerator.initialize calls it by default:
+            // SecureRandom random = SecureRandom.getInstanceStrong();
+            keyPairGenerator.initialize(2048);
 
-            keyPair = keyPairGenerator.generateKeyPair();
-            pub = Base64.getEncoder().encodeToString(keyPair.getPublic().getEncoded());
-            priv = Base64.getEncoder().encodeToString(keyPair.getPrivate().getEncoded());
+            KeyPair keyPair = keyPairGenerator.generateKeyPair();
+            pub = BitSet.valueOf(keyPair.getPublic().getEncoded());
+            log.info("KeyPaar erfolgreich erzeugt. Länge des Bitstreams: "+pub.size());
+            priv = BitSet.valueOf(keyPair.getPrivate().getEncoded());
 
         } catch (NoSuchAlgorithmException e) {
-            log.warn("Hier ist aber mächtig was schief gegangen", e);
+            log.warn("Fehler bei der Schlüssel Erzeugung: ", e);
         }
 
         // KeyPaar für die DB erzeugen und speichern
         Date timestamp = new Date();
-        KeyPaar keyPaar = new KeyPaar(timestamp, pub, priv);
+        BitSet decayVector = new BitSet(pub.size()); // Create decayVector which size is equivalent to the size of the public key
+        log.info("Decay Vector created: "+decayVector);
+        KeyPaar keyPaar = new KeyPaar(timestamp, pub, priv, decayVector);
         // KeyPair in MongoDB abspeichern:
         return keyPaarRepository.save(keyPaar);
     }
@@ -55,7 +55,7 @@ public class KeyService {
     public static PubKeyDTO getPubKey(KeyPaar keyPaar) {
         PubKeyDTO pubKeyDTO = new PubKeyDTO();
         pubKeyDTO.setId(keyPaar.getId());
-        pubKeyDTO.setPubKey(keyPaar.getPub());
+        pubKeyDTO.setPubKey(bitSetToBase64(keyPaar.getPub()));
         log.warn("PubKeyDTO wird ausgegeben. PubKey: "+pubKeyDTO.getPubKey());
         return pubKeyDTO;
     }
@@ -66,8 +66,9 @@ public class KeyService {
         for (KeyPaar keyPaar : keyPaars) {
             EventDTO current = new EventDTO();
             current.setId(keyPaar.getId());
-            current.setPubKey(keyPaar.getPub());
+            current.setPubKey(bitSetToBase64(keyPaar.getPub()));
             current.setTimestamp(keyPaar.getTimestamp());
+            current.setNumberOfDecayedBits(keyPaar.getDecayVector().cardinality());
             events.add(current);
         }
         return events;
@@ -75,6 +76,45 @@ public class KeyService {
 
     public long count() {
         return keyPaarRepository.count();
+    }
+
+    public byte[] getPrivKeyInBytes(String id) {
+        KeyPaar keyPaar = keyPaarRepository.findOne(id);
+        return keyPaar.getPriv().toByteArray();
+    }
+
+    public Map decayKey(String keyPaarId) {
+        HashMap map = new HashMap<>();
+        KeyPaar keyPaar = keyPaarRepository.findOne(keyPaarId);
+        // First 288 Bits and last 32 of 2368 bit RSA key bitstream are meta data.
+        // Therefore we have to choose a random int inside the signature part of the RSA key.
+        int rnd = randInt(288, 288 + 2048);
+
+        // Clear Random-Bit in privateKey
+        BitSet priv = keyPaar.getPriv();
+        priv.clear(rnd);
+        keyPaar.setPriv(priv);
+
+        // Set Random-Bit in decayVector
+        BitSet decayVector = keyPaar.getDecayVector();
+        decayVector.set(rnd);
+        keyPaar.setDecayVector(decayVector);
+
+        keyPaarRepository.save(keyPaar);
+        map.put("type", "success");
+        map.put("msg", "rnd: "+rnd+" new decayVector: "+keyPaar.getDecayVector());
+        log.info("Key decayed! rnd: "+rnd+" New decayVector: "+keyPaar.getDecayVector());
+        return map;
+    }
+
+    public static String bitSetToBase64(BitSet bitSet) {
+        return Base64.getEncoder().encodeToString(bitSet.toByteArray());
+    }
+
+    public static int randInt(int min, int max) {
+        Random rand = new Random();
+        int randomNum = rand.nextInt((max - min) + 1) + min;
+        return randomNum;
     }
 
 }

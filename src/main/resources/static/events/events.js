@@ -21,5 +21,12 @@ app.controller('events', function($scope, $http) {
             });
     }
 
+    $scope.decay = function (event) {
+        $http.get('/api/key/decay/'+event.id).
+            success(function(data) {
+                $scope.alerts.push(data);
+            });
+    }
+
 
 });
