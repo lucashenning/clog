@@ -21,8 +21,14 @@ import static org.elasticsearch.node.NodeBuilder.nodeBuilder;
 @Repository
 public class DecryptedLogRepository {
 
-    private Node node = nodeBuilder().client(true).clusterName(ConfigurationService.elasticSearchClusterName).node();
-    private Client client = node.client();
+    private Node node;
+    private Client client;
+
+    @Autowired
+    public DecryptedLogRepository (ConfigurationService configurationService){
+        this.node = nodeBuilder().client(true).clusterName(configurationService.getElasticSearchClusterName()).node();
+        this.client = node.client();
+    }
 
     public IndexResponse add(String data) {
         IndexResponse response = client.prepareIndex("log", "entry") // TODO: Clustername dynamisch aus Config-Datei auslesen

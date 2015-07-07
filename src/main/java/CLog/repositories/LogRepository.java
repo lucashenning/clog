@@ -21,11 +21,15 @@ public class LogRepository {
 
     private MongoClient mongoClient;
 
-    private String ip = ConfigurationService.logMongoDbIp;
-    private String db = ConfigurationService.logMongoDbDb;
-    private String collection = ConfigurationService.logMongoDbCollection;
+    private String ip;
+    private String collection;
+    private String db;
 
-    public LogRepository() {
+    @Autowired
+    public LogRepository(ConfigurationService config) {
+        this.ip = config.logMongoDbIp;
+        this.collection = config.getLogMongoDbCollection();
+        this.db = config.getLogMongoDbDb();
         try {
             mongoClient = new MongoClient(this.ip);
         } catch (UnknownHostException e) {

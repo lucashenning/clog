@@ -41,7 +41,6 @@ public class PubKeyController {
 
     @RequestMapping(value="/all", method = RequestMethod.GET)
     public ArrayList<EventDTO> getAllKeys() {
-        log.info("All Events requested.");
         return keyService.getAllKeyEvents();
     }
 

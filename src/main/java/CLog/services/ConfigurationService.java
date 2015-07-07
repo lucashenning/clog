@@ -11,22 +11,57 @@ public class ConfigurationService {
 
 
     @Value("${elasticsearch.clustername}")
-    public static String elasticSearchClusterName = "clog";
+    public String elasticSearchClusterName;
 
     @Value("${logmongodb.ip}")
-    public static String logMongoDbIp = "172.31.1.50";
+    public String logMongoDbIp;
 
     @Value("${logmongodb.collection}")
-    public static String logMongoDbCollection = "logstash";
+    public String logMongoDbCollection;
 
     @Value("${logmongodb.db}")
-    public static String logMongoDbDb = "ls_db";
+    public String logMongoDbDb;
 
     @Value("${rsa.validation.string}")
-    public static String validationString = "YetAnotherRSAValidationString";
+    public String validationString;
 
+    public String getElasticSearchClusterName() {
+        return elasticSearchClusterName;
+    }
 
+    public void setElasticSearchClusterName(String elasticSearchClusterName) {
+        this.elasticSearchClusterName = elasticSearchClusterName;
+    }
 
+    public String getLogMongoDbIp() {
+        return logMongoDbIp;
+    }
 
+    public void setLogMongoDbIp(String logMongoDbIp) {
+        this.logMongoDbIp = logMongoDbIp;
+    }
 
+    public String getLogMongoDbCollection() {
+        return logMongoDbCollection;
+    }
+
+    public void setLogMongoDbCollection(String logMongoDbCollection) {
+        this.logMongoDbCollection = logMongoDbCollection;
+    }
+
+    public String getLogMongoDbDb() {
+        return logMongoDbDb;
+    }
+
+    public void setLogMongoDbDb(String logMongoDbDb) {
+        this.logMongoDbDb = logMongoDbDb;
+    }
+
+    public String getValidationString() {
+        return validationString;
+    }
+
+    public void setValidationString(String validationString) {
+        this.validationString = validationString;
+    }
 }

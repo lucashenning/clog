@@ -6,7 +6,6 @@ import CLog.entities.PubKeyDTO;
 import CLog.repositories.KeyPaarRepository;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.elasticsearch.river.RiverIndexName;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +16,7 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.security.*;
+import java.security.interfaces.RSAPrivateKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
@@ -37,21 +37,23 @@ public class KeyService {
     @Autowired
     private DecryptService decryptService;
 
+    @Autowired
+    private ConfigurationService configurationService;
 
     public KeyPaar generateKeyPaar() {
         BitSet pub = null;
         BitSet priv = null;
         try {
-
             KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
-            // Don't need this because keyPairGenerator.initialize calls it by default:
-            // SecureRandom random = SecureRandom.getInstanceStrong();
             keyPairGenerator.initialize(2048);
 
             KeyPair keyPair = keyPairGenerator.generateKeyPair();
             pub = BitSet.valueOf(keyPair.getPublic().getEncoded());
-            log.info("KeyPaar erfolgreich erzeugt. Länge des Bitstreams: "+pub.size());
             priv = BitSet.valueOf(keyPair.getPrivate().getEncoded());
+            log.info("KeyPaar erfolgreich erzeugt. Länge des Private Key in Bits: "+priv.size());
+
+            RSAPrivateKey rsaPrivateKey = (RSAPrivateKey) keyPair.getPrivate();
+            log.info("Private Exponent: "+rsaPrivateKey.getPrivateExponent());
 
         } catch (NoSuchAlgorithmException e) {
             log.warn("Fehler bei der Schlüssel Erzeugung: ", e);
@@ -59,11 +61,11 @@ public class KeyService {
 
         // KeyPaar für die DB erzeugen und speichern
         Date timestamp = new Date();
-        BitSet decayVector = new BitSet(pub.size()); // Create decayVector which size is equivalent to the size of the public key
+        BitSet decayVector = new BitSet(priv.size()); // Create decayVector which size is equivalent to the size of the private key
         log.info("Decay Vector created: "+decayVector);
         byte[] validator = {};
         try {
-            validator = encryptRSA(ConfigurationService.validationString.getBytes(), pub.toByteArray());
+            validator = encryptRSA(configurationService.getValidationString().getBytes(), pub.toByteArray());
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         } catch (InvalidKeySpecException e) {
@@ -119,17 +121,13 @@ public class KeyService {
         KeyPaar keyPaar = keyPaarRepository.findOne(keyPaarId);
         // First 288 Bits and last 32 of 2368 bit RSA key bitstream are meta data.
         // Therefore we have to choose a random int inside the signature part of the RSA key.
-        int rnd = randInt(288, 288 + 2048);
+        int rnd = randInt(0, keyPaar.getPriv().size() - 1); // TODO: Exakte Länge des RSA-Keys bestimmen und nur relevante Bits löschen.
 
         // Clear Random-Bit in privateKey
-        BitSet priv = keyPaar.getPriv();
-        priv.clear(rnd);
-        keyPaar.setPriv(priv);
+        keyPaar.getPriv().clear(rnd);
 
         // Set Random-Bit in decayVector
-        BitSet decayVector = keyPaar.getDecayVector();
-        decayVector.set(rnd);
-        keyPaar.setDecayVector(decayVector);
+        keyPaar.getDecayVector().set(rnd);
 
         keyPaarRepository.save(keyPaar);
         map.put("type", "success");
@@ -173,11 +171,12 @@ public class KeyService {
         try {
             byte[] byteResult = decryptRSA(validator, privKey);
             String stringResult = new String(byteResult);
-            if (stringResult.equals(ConfigurationService.validationString)) {
+            if (stringResult.equals(configurationService.getValidationString())) {
                 return true;
             }
         } catch (NoSuchPaddingException | NoSuchAlgorithmException | InvalidKeyException | InvalidKeySpecException | IllegalBlockSizeException | BadPaddingException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
+            log.info("ValidateRSAKey: RSA Decryption Error --> Not a valid Key");
         }
         return false;
     }
