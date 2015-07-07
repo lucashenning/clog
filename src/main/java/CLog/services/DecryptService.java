@@ -48,20 +48,15 @@ public class DecryptService {
         log.warn("Encrypted Session Key is (Base64): "+(String) map.get("encrypted_session_key"));
         byte[] encrypted_session_key = Base64.getDecoder().decode((String) map.get("encrypted_session_key"));
 
-
         try {
             // RSA Decrypt to get Session Key
             byte[] privKeyInBytes = keyService.getPrivKeyInBytes(id);
-            Cipher rsa = Cipher.getInstance("RSA");
-            PrivateKey privateKey =  KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(privKeyInBytes));
-            rsa.init(Cipher.DECRYPT_MODE, privateKey);
-            byte[] session_key = rsa.doFinal(encrypted_session_key);
+            byte[] session_key = keyService.decryptRSA(encrypted_session_key, privKeyInBytes);
             log.warn("RSA Result in Base 64: "+Base64.getEncoder().encodeToString(session_key));
 
             // AES Decrypt Event
-            Cipher aes = Cipher.getInstance("AES/CBC/PKCS5Padding");
-            aes.init(Cipher.DECRYPT_MODE, new SecretKeySpec(session_key, "AES"), new IvParameterSpec(iv, 0, aes.getBlockSize()));
-            String plaintext = new String(aes.doFinal(ciphertext));
+            byte [] result = keyService.decryptAES(ciphertext, iv, session_key);
+            String plaintext = new String(result);
             log.warn("AES Result: "+plaintext);
 
             // Write to Elastic
@@ -69,20 +64,11 @@ public class DecryptService {
 
             return plaintext;
 
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (NoSuchPaddingException e) {
-            e.printStackTrace();
-        } catch (InvalidKeySpecException e) {
-            e.printStackTrace();
-        } catch (InvalidKeyException e) {
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidKeySpecException | IllegalBlockSizeException | InvalidAlgorithmParameterException e) {
             e.printStackTrace();
         } catch (BadPaddingException e) {
             e.printStackTrace();
-        } catch (IllegalBlockSizeException e) {
-            e.printStackTrace();
-        } catch (InvalidAlgorithmParameterException e) {
-            e.printStackTrace();
+            return "RSA Padding Exception: Seems like you try to decrypt directly with an incomplete key...";
         }
         return "Fehler";
     }

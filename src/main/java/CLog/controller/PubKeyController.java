@@ -64,4 +64,9 @@ public class PubKeyController {
         return keyService.decayKey(id);
     }
 
+    @RequestMapping(value="/recover/{id}", method = RequestMethod.GET)
+    public Map<String,Object> recover(@PathVariable String id) {
+        return keyService.recoverKey(id);
+    }
+
 }

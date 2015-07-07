@@ -6,10 +6,20 @@ import CLog.entities.PubKeyDTO;
 import CLog.repositories.KeyPaarRepository;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.elasticsearch.river.RiverIndexName;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 import java.security.*;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.*;
 
 
@@ -23,6 +33,10 @@ public class KeyService {
 
     @Autowired
     private KeyPaarRepository keyPaarRepository;
+
+    @Autowired
+    private DecryptService decryptService;
+
 
     public KeyPaar generateKeyPaar() {
         BitSet pub = null;
@@ -47,7 +61,24 @@ public class KeyService {
         Date timestamp = new Date();
         BitSet decayVector = new BitSet(pub.size()); // Create decayVector which size is equivalent to the size of the public key
         log.info("Decay Vector created: "+decayVector);
-        KeyPaar keyPaar = new KeyPaar(timestamp, pub, priv, decayVector);
+        byte[] validator = {};
+        try {
+            validator = encryptRSA(ConfigurationService.validationString.getBytes(), pub.toByteArray());
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (InvalidKeySpecException e) {
+            e.printStackTrace();
+        } catch (InvalidKeyException e) {
+            e.printStackTrace();
+        } catch (BadPaddingException e) {
+            e.printStackTrace();
+        } catch (IllegalBlockSizeException e) {
+            e.printStackTrace();
+        } catch (NoSuchPaddingException e) {
+            e.printStackTrace();
+        }
+        log.info("Validator created: "+validator);
+        KeyPaar keyPaar = new KeyPaar(timestamp, pub, priv, decayVector, validator);
         // KeyPair in MongoDB abspeichern:
         return keyPaarRepository.save(keyPaar);
     }
@@ -105,6 +136,70 @@ public class KeyService {
         map.put("msg", "rnd: "+rnd+" new decayVector: "+keyPaar.getDecayVector());
         log.info("Key decayed! rnd: "+rnd+" New decayVector: "+keyPaar.getDecayVector());
         return map;
+    }
+
+    public Map recoverKey(String keyPaarId) {
+        HashMap map = new HashMap<>();
+        KeyPaar keyPaar = keyPaarRepository.findOne(keyPaarId);
+        BitSet result = bruteForceKey(keyPaar.getPriv(), keyPaar.getDecayVector(), keyPaar.getValidator());
+        map.put("type", "success");
+        map.put("msg", "Successfully recovered key: "+result);
+        return map;
+    }
+
+    public BitSet bruteForceKey(BitSet key, BitSet decayVector, byte[] validator) {
+        if ( decayVector.isEmpty() ) { // wenn der decayVector nur Nullen enthält, ist der key vollständig generiert und muss validiert werden.
+            if ( validateRSAprivKey(key.toByteArray(), validator) ) {
+                log.info("BruteForceKey: Found the right key:"+key);
+                return key;
+            } else {
+                log.info("BruteForceKey: Wrong key tested: "+key);
+                return null;
+            }
+        } else {
+            int firstSetBit = decayVector.nextSetBit(0); // Erste 1 im Vektor suchen
+            decayVector.clear(firstSetBit); // Die gefundene Position im DecayVector auf 0 setzen
+            BitSet firstResult = bruteForceKey(key, decayVector, validator); // Aufruf der Funktion mit der gefundenen Stelle im Key = 0
+            if (firstResult == null) { // Wenn beim ersten Aufruf kein Key gefunden wurde, dann zweiter Aufruf
+                key.set(firstSetBit);
+                return bruteForceKey(key, decayVector, validator); // Aufruf der Funktion mit der gefundenen Stelle im Key = 1
+            } else {
+                return firstResult;
+            }
+        }
+    }
+
+    public boolean validateRSAprivKey(byte[] privKey, byte[] validator) {
+        try {
+            byte[] byteResult = decryptRSA(validator, privKey);
+            String stringResult = new String(byteResult);
+            if (stringResult.equals(ConfigurationService.validationString)) {
+                return true;
+            }
+        } catch (NoSuchPaddingException | NoSuchAlgorithmException | InvalidKeyException | InvalidKeySpecException | IllegalBlockSizeException | BadPaddingException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public byte[] encryptRSA(byte[] plaintext, byte[] pubKey) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException, NoSuchPaddingException {
+        Cipher rsa = Cipher.getInstance("RSA");
+        PublicKey publicKey =  KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(pubKey));
+        rsa.init(Cipher.ENCRYPT_MODE, publicKey);
+        return rsa.doFinal(plaintext);
+    }
+
+    public byte[] decryptRSA(byte[] ciphertext, byte[] privKey) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
+        Cipher rsa = Cipher.getInstance("RSA");
+        PrivateKey privateKey =  KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(privKey));
+        rsa.init(Cipher.DECRYPT_MODE, privateKey);
+        return rsa.doFinal(ciphertext);
+    }
+
+    public byte[] decryptAES(byte[] ciphertext, byte[] iv, byte[] aesKey) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
+        Cipher aes = Cipher.getInstance("AES/CBC/PKCS5Padding");
+        aes.init(Cipher.DECRYPT_MODE, new SecretKeySpec(aesKey, "AES"), new IvParameterSpec(iv, 0, aes.getBlockSize()));
+        return aes.doFinal(ciphertext);
     }
 
     public static String bitSetToBase64(BitSet bitSet) {

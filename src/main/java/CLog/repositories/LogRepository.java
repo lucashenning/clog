@@ -1,7 +1,11 @@
 package CLog.repositories;
 
+import CLog.services.ConfigurationService;
 import com.mongodb.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 
 import java.net.UnknownHostException;
@@ -11,13 +15,15 @@ import java.util.Map;
 /**
  * Created by l.henning on 24.06.2015.
  */
+
 @Repository
 public class LogRepository {
 
     private MongoClient mongoClient;
-    private String ip = "172.31.1.50";
-    private String db = "ls_db";
-    private String collection = "logstash";
+
+    private String ip = ConfigurationService.logMongoDbIp;
+    private String db = ConfigurationService.logMongoDbDb;
+    private String collection = ConfigurationService.logMongoDbCollection;
 
     public LogRepository() {
         try {

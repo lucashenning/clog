@@ -19,12 +19,14 @@ public class KeyPaar {
     private BitSet pub;
     private BitSet priv;
     private BitSet decayVector;
+    private byte[] validator;
 
-    public KeyPaar(Date timestamp, BitSet pub, BitSet priv, BitSet decayVector) {
+    public KeyPaar(Date timestamp, BitSet pub, BitSet priv, BitSet decayVector, byte[] validator) {
         this.timestamp = timestamp;
         this.pub = pub;
         this.priv = priv;
         this.decayVector = decayVector;
+        this.validator = validator;
     }
 
     public String getId() {
@@ -65,5 +67,13 @@ public class KeyPaar {
 
     public void setDecayVector(BitSet decayVector) {
         this.decayVector = decayVector;
+    }
+
+    public byte[] getValidator() {
+        return validator;
+    }
+
+    public void setValidator(byte[] validator) {
+        this.validator = validator;
     }
 }

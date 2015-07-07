@@ -24,6 +24,14 @@ app.controller('events', function($scope, $http) {
     $scope.decay = function (event) {
         $http.get('/api/key/decay/'+event.id).
             success(function(data) {
+                $scope.alerts.splice(0, 1);
+                $scope.alerts.push(data);
+            });
+    }
+
+    $scope.recover = function (event) {
+        $http.get('/api/key/recover/'+event.id).
+            success(function(data) {
                 $scope.alerts.push(data);
             });
     }
