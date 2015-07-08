@@ -5,7 +5,8 @@
 
 app.factory('RequestFactory', function($resource) {
     return $resource('/api/request/:id', { id: '@id' }, {
-        approve: {method: 'POST', params: { approve: true } }
+        approve: {method: 'POST', params: { approve: true } },
+        countEvents: {method: 'GET', url: '/api/request/:id/countevents'},
     });
 });
 
@@ -41,6 +42,15 @@ app.controller('requests', function($scope, RequestFactory, $modal, $filter) {
             $scope.alerts.splice(0, 1);
             $scope.alerts.push(response);
         });
+    }
+
+    $scope.countEvents = function (request) {
+        // TODO: Call Function to retrieve EventsCount here!
+        //return request.$countEvents(); // ENDLOS SCHLEIFE
+        $http.get('/api/request/'+request.id+'/countEvents/').
+            success(function(data) {
+                return data;
+            });
     }
 
     $scope.removeRecord = function(index) {

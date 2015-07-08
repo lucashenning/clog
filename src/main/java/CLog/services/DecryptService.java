@@ -23,7 +23,10 @@ import java.util.Map;
 
 /**
  * Created by l.henning on 24.06.2015.
+ * Schnittstelle der drei Datenbanken
+ * Lokale MongoDB mit Keys, entfernte MongoDB mit Log-Einträgen und ElasticSearch-Instanz mit Ergebnissen.
  */
+
 @Service
 public class DecryptService {
 
@@ -39,6 +42,7 @@ public class DecryptService {
     private DecryptedLogRepository decryptedLogRepository;
 
     public String decrypt(String id) {
+        // Read from Remote MongoDB
         Map<String,Object> map = logRepository.findOne(id);
         log.warn("Object received from remote MongoDB: "+map);
 
@@ -50,7 +54,7 @@ public class DecryptService {
 
         try {
             // RSA Decrypt to get Session Key
-            byte[] privKeyInBytes = keyService.getPrivKeyInBytes(id);
+            byte[] privKeyInBytes = keyService.findOne(id).getPriv().toByteArray();
             byte[] session_key = keyService.decryptRSA(encrypted_session_key, privKeyInBytes);
             log.warn("RSA Result in Base 64: "+Base64.getEncoder().encodeToString(session_key));
 

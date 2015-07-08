@@ -30,7 +30,7 @@
         </td>
         <td data-title="'Initiator'">{{request.initiator['username']}}</td>
         <td data-title="'Created'">{{request.timestamp | date:"dd.MM.yyyy"}}</td>
-        <td data-title="'Zeitraum'">{{request.startDate | date:"dd.MM.yyyy"}} bis {{request.endDate | date:"dd.MM.yyyy"}}</td>
+        <td data-title="'Zeitraum'">{{request.startDate | date:"dd.MM.yyyy"}} bis {{request.endDate | date:"dd.MM.yyyy"}} ( {{ countEvents(request) }} )</td>
         <td data-title="'Actions'">
             <a href="" ng-show="request.initiator['username'] != username && request.status == 1" ng-click="approve(request)" class="btn btn-success btn-xs" >Approve</a>
             <a href="" ng-show="request.initiator['username'] == username" ng-click="openModal(request)" class="btn btn-primary btn-xs" >Edit</a>

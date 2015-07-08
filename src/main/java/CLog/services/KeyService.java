@@ -15,12 +15,14 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+import java.math.BigInteger;
 import java.security.*;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 
 /**
@@ -35,9 +37,6 @@ public class KeyService {
     private KeyPaarRepository keyPaarRepository;
 
     @Autowired
-    private DecryptService decryptService;
-
-    @Autowired
     private ConfigurationService configurationService;
 
     public KeyPaar generateKeyPaar() {
@@ -46,14 +45,16 @@ public class KeyService {
         try {
             KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
             keyPairGenerator.initialize(2048);
-
             KeyPair keyPair = keyPairGenerator.generateKeyPair();
+
             pub = BitSet.valueOf(keyPair.getPublic().getEncoded());
             priv = BitSet.valueOf(keyPair.getPrivate().getEncoded());
             log.info("KeyPaar erfolgreich erzeugt. Länge des Private Key in Bits: "+priv.size());
 
             RSAPrivateKey rsaPrivateKey = (RSAPrivateKey) keyPair.getPrivate();
-            log.info("Private Exponent: "+rsaPrivateKey.getPrivateExponent());
+            log.info("Whole Private Key as Binary: "+byteToBinary(rsaPrivateKey.getEncoded()));
+            log.info("Private Exponent as Binary: "+byteToBinary(rsaPrivateKey.getPrivateExponent().toByteArray()));
+            log.info("Private Exponent Substring: "+byteToBinary(rsaPrivateKey.getEncoded()).substring(2424,4472));
 
         } catch (NoSuchAlgorithmException e) {
             log.warn("Fehler bei der Schlüssel Erzeugung: ", e);
@@ -79,7 +80,7 @@ public class KeyService {
         } catch (NoSuchPaddingException e) {
             e.printStackTrace();
         }
-        log.info("Validator created: "+validator);
+        log.info("Validator created: "+byteToBinary(validator));
         KeyPaar keyPaar = new KeyPaar(timestamp, pub, priv, decayVector, validator);
         // KeyPair in MongoDB abspeichern:
         return keyPaarRepository.save(keyPaar);
@@ -111,20 +112,27 @@ public class KeyService {
         return keyPaarRepository.count();
     }
 
-    public byte[] getPrivKeyInBytes(String id) {
-        KeyPaar keyPaar = keyPaarRepository.findOne(id);
-        return keyPaar.getPriv().toByteArray();
+    public KeyPaar findOne(String id) {
+        return keyPaarRepository.findOne(id);
+    }
+
+    public List<KeyPaar> findByTimestampBetween(Date startDate, Date endDate) {
+        return keyPaarRepository.findByTimestampBetween(startDate, endDate);
     }
 
     public Map decayKey(String keyPaarId) {
         HashMap map = new HashMap<>();
         KeyPaar keyPaar = keyPaarRepository.findOne(keyPaarId);
-        // First 288 Bits and last 32 of 2368 bit RSA key bitstream are meta data.
-        // Therefore we have to choose a random int inside the signature part of the RSA key.
-        int rnd = randInt(0, keyPaar.getPriv().size() - 1); // TODO: Exakte Länge des RSA-Keys bestimmen und nur relevante Bits löschen.
+        // Random int inside the RSA private exponent. (between 2424 and 4471)
+        //int rnd = randInt(2424, 4471); // TODO: Exakte Länge des RSA-Keys bestimmen und nur relevante Bits löschen.
+        int rnd = randInt(0, keyPaar.getPriv().size() - 1);
+
+        log.info("Card:"+keyPaar.getPriv().cardinality()+"Key before decay: "+byteToBinary(keyPaar.getPriv().toByteArray()));
 
         // Clear Random-Bit in privateKey
         keyPaar.getPriv().clear(rnd);
+
+        log.info("Card:"+keyPaar.getPriv().cardinality()+" Key after decay: "+byteToBinary(keyPaar.getPriv().toByteArray()));
 
         // Set Random-Bit in decayVector
         keyPaar.getDecayVector().set(rnd);
@@ -139,28 +147,36 @@ public class KeyService {
     public Map recoverKey(String keyPaarId) {
         HashMap map = new HashMap<>();
         KeyPaar keyPaar = keyPaarRepository.findOne(keyPaarId);
-        BitSet result = bruteForceKey(keyPaar.getPriv(), keyPaar.getDecayVector(), keyPaar.getValidator());
+        log.info("Starting Key Recovery for Key "+keyPaar.getId()+" with cardinality "+keyPaar.getPriv().cardinality()+" and vector "+keyPaar.getDecayVector());
+        AtomicInteger i = new AtomicInteger(0);
+        BitSet result = bruteForceKey(keyPaar.getPriv(), keyPaar.getDecayVector(), keyPaar.getValidator(), i);
+        keyPaar.setPriv(result);
+        keyPaar.getDecayVector().clear(0,keyPaar.getDecayVector().size());
+        keyPaarRepository.save(keyPaar);
         map.put("type", "success");
-        map.put("msg", "Successfully recovered key: "+result);
+        map.put("msg", "Successfully recovered key: Needed "+i+" rounds. Key: "+result);
         return map;
     }
 
-    public BitSet bruteForceKey(BitSet key, BitSet decayVector, byte[] validator) {
-        if ( decayVector.isEmpty() ) { // wenn der decayVector nur Nullen enthält, ist der key vollständig generiert und muss validiert werden.
-            if ( validateRSAprivKey(key.toByteArray(), validator) ) {
-                log.info("BruteForceKey: Found the right key:"+key);
-                return key;
+    public BitSet bruteForceKey(BitSet key, BitSet decayVector, byte[] validator, AtomicInteger i) {
+        BitSet currentDecayVector = (BitSet) decayVector.clone();
+        BitSet currentKey = (BitSet) key.clone();
+        if ( currentDecayVector.isEmpty() ) { // wenn der decayVector nur Nullen enthält, ist der key vollständig generiert und muss validiert werden.
+            i.incrementAndGet();
+            if ( validateRSAprivKey(currentKey.toByteArray(), validator) ) {
+                log.info("BruteForceKey: Found the right key:"+currentKey);
+                return currentKey;
             } else {
-                log.info("BruteForceKey: Wrong key tested: "+key);
+                log.info("BruteForceKey: Round "+i+" Wrong key tested: "+currentKey);
                 return null;
             }
         } else {
-            int firstSetBit = decayVector.nextSetBit(0); // Erste 1 im Vektor suchen
-            decayVector.clear(firstSetBit); // Die gefundene Position im DecayVector auf 0 setzen
-            BitSet firstResult = bruteForceKey(key, decayVector, validator); // Aufruf der Funktion mit der gefundenen Stelle im Key = 0
+            int firstSetBit = currentDecayVector.nextSetBit(0); // Erste 1 im Vektor suchen
+            currentDecayVector.clear(firstSetBit); // Die gefundene Position im DecayVector auf 0 setzen
+            BitSet firstResult = bruteForceKey(currentKey, currentDecayVector, validator, i); // Aufruf der Funktion mit der gefundenen Stelle im Key = 0
             if (firstResult == null) { // Wenn beim ersten Aufruf kein Key gefunden wurde, dann zweiter Aufruf
-                key.set(firstSetBit);
-                return bruteForceKey(key, decayVector, validator); // Aufruf der Funktion mit der gefundenen Stelle im Key = 1
+                currentKey.set(firstSetBit);
+                return bruteForceKey(currentKey, currentDecayVector, validator, i); // Aufruf der Funktion mit der gefundenen Stelle im Key = 1
             } else {
                 return firstResult;
             }
@@ -171,7 +187,8 @@ public class KeyService {
         try {
             byte[] byteResult = decryptRSA(validator, privKey);
             String stringResult = new String(byteResult);
-            if (stringResult.equals(configurationService.getValidationString())) {
+            if ( stringResult.equals( configurationService.getValidationString() ) ) {
+                log.warn("Found the right String result (valid key): "+stringResult);
                 return true;
             }
         } catch (NoSuchPaddingException | NoSuchAlgorithmException | InvalidKeyException | InvalidKeySpecException | IllegalBlockSizeException | BadPaddingException e) {
@@ -209,6 +226,13 @@ public class KeyService {
         Random rand = new Random();
         int randomNum = rand.nextInt((max - min) + 1) + min;
         return randomNum;
+    }
+
+    public String byteToBinary( byte[] bytes )  {
+        StringBuilder sb = new StringBuilder(bytes.length * Byte.SIZE);
+        for( int i = 0; i < Byte.SIZE * bytes.length; i++ )
+            sb.append((bytes[i / Byte.SIZE] << i % Byte.SIZE & 0x80) == 0 ? '0' : '1');
+        return sb.toString();
     }
 
 }

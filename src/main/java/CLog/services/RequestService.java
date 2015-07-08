@@ -1,19 +1,20 @@
 package CLog.services;
 
 import CLog.entities.Approval;
+import CLog.entities.KeyPaar;
 import CLog.entities.Request;
 import CLog.entities.User;
 import CLog.repositories.RequestRepository;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by l.henning on 17.06.2015.
@@ -21,12 +22,16 @@ import java.util.Map;
 @Service
 public class RequestService {
 
+    private static Log log = LogFactory.getLog(RequestService.class);
 
     @Autowired
     private RequestRepository requestRepository;
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private KeyService keyService;
 
     public Request newRequest(Request preRequest) {
         Request request = new Request();
@@ -44,6 +49,7 @@ public class RequestService {
     }
 
     public Request editRequest(Request request) {
+        // TODO: Request Approvals clearn.
         return requestRepository.save(request);
     }
 
@@ -80,16 +86,17 @@ public class RequestService {
                 map.put("msg", "Can not approve request. This request is already approved by " + user.getUsername());
                 return map;
             } else {
+                map.put("type", "success");
+                map.put("msg", "Request approved!");
                 Approval approval = new Approval();
                 approval.setApprover(user);
                 approval.setTimestamp(new Date());
                 request.getApprovals().add(approval);
                 if (request.getApprovals().size() == 2) {
                     request.setStatus(2); // Status = approved
+                    map.put("msg", "Request approved! And new Status: APPROVED! Beginning decryption as soon as possible...");
                 }
                 requestRepository.save(request);
-                map.put("type", "success");
-                map.put("msg", "Request approved!");
                 return map;
             }
         } else {
@@ -100,8 +107,23 @@ public class RequestService {
     }
 
     public boolean execute(Request request) {
-
+        // TODO: Request ausführen (async)
         return true;
+    }
+
+    public AtomicInteger getProgress(Request request) {
+        // TODO: Progress der Ausführung abfragen
+        return new AtomicInteger(0);
+    }
+
+    public List<KeyPaar> getEventsOfRequest (Request request) {
+        return keyService.findByTimestampBetween(request.getStartDate(), request.getEndDate());
+    }
+
+    public int countEventsOfRequest (String id) {
+        Request request = requestRepository.findOne(id);
+        log.info(request);
+        return getEventsOfRequest(request).size();
     }
 
 }

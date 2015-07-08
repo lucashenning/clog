@@ -50,6 +50,11 @@ public class RequestController {
         return requestService.count();
     }
 
+    @RequestMapping(value="/{id}/countevents", method = RequestMethod.GET)
+    public int countEvents(@PathVariable String id) {
+        return requestService.countEventsOfRequest(id);
+    }
+
     @RequestMapping(value="/{id}", method = RequestMethod.POST, params = "approve=true")
     public Map<String,Object> approve(@PathVariable String id) {
         return requestService.approve(id);
