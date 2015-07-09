@@ -15,7 +15,6 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-import java.math.BigInteger;
 import java.security.*;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.spec.InvalidKeySpecException;
@@ -38,6 +37,9 @@ public class KeyService {
 
     @Autowired
     private ConfigurationService configurationService;
+
+    @Autowired
+    private KeyRecoveryService keyRecoveryService;
 
     public KeyPaar generateKeyPaar() {
         BitSet pub = null;
@@ -117,7 +119,69 @@ public class KeyService {
     }
 
     public List<KeyPaar> findByTimestampBetween(Date startDate, Date endDate) {
-        return keyPaarRepository.findByTimestampBetween(startDate, endDate);
+        List<KeyPaar> list = keyPaarRepository.findByTimestampBetween(startDate, endDate);
+        log.info("Looked for KeyPairs between "+startDate+" and "+endDate+" ... found: "+list);
+        return list;
+    }
+
+    public boolean recoverKeys(List<KeyPaar> list) {
+        keyRecoveryService.setProgress(new AtomicInteger(0));
+        keyRecoveryService.setMax(new AtomicInteger(countVariants(list)));
+        for (KeyPaar k : list) {
+            keyRecoveryService.recoverKey(k);
+        }
+        return true;
+    }
+
+    public int countVariants(List<KeyPaar> list) {
+        int result = 0;
+        for (KeyPaar k : list) {
+            result = result + countVariants(k);
+        }
+        return result;
+    }
+
+    public int countVariants(KeyPaar k) {
+        return (int) Math.pow( 2, k.getDecayVector().cardinality());
+    }
+
+    public Map getKeyRecoveryStatus() {
+        Map<String, Object> map= new HashMap<>();
+        if (keyRecoveryService.isBusy()) {
+            map.put("progress",keyRecoveryService.getProgress());
+            map.put("max",keyRecoveryService.getMax());
+        } else {
+            map.put("msg", "Recovery Service is not busy...");
+        }
+        return map;
+    }
+
+    public Map recoverOneKey(String id) {
+        KeyPaar keyPaar = keyPaarRepository.findOne(id);
+        List<KeyPaar> list = new ArrayList<KeyPaar>();
+        list.add(keyPaar);
+        HashMap map = new HashMap<>();
+        if ( recoverKeys(list) ) {
+            map.put("type", "success");
+            map.put("msg", "Key Recovery started...");
+        } else {
+            map.put("type", "error");
+            map.put("msg", "Error in KeyRecovery");
+        }
+        return map;
+    }
+
+    public Map recoverMultipleKeys(Date startDate, Date endDate) {
+        List<KeyPaar> list = findByTimestampBetween(startDate, endDate);
+        HashMap map = new HashMap<>();
+        if ( recoverKeys(list) ) {
+            map.put("type", "success");
+            map.put("msg", "Key Recovery started for "+list.size()+" keys...");
+        } else {
+            map.put("type", "error");
+            map.put("msg", "Error in KeyRecovery");
+        }
+        return map;
     }
 
     public Map decayKey(String keyPaarId) {
@@ -142,45 +206,6 @@ public class KeyService {
         map.put("msg", "rnd: "+rnd+" new decayVector: "+keyPaar.getDecayVector());
         log.info("Key decayed! rnd: "+rnd+" New decayVector: "+keyPaar.getDecayVector());
         return map;
-    }
-
-    public Map recoverKey(String keyPaarId) {
-        HashMap map = new HashMap<>();
-        KeyPaar keyPaar = keyPaarRepository.findOne(keyPaarId);
-        log.info("Starting Key Recovery for Key "+keyPaar.getId()+" with cardinality "+keyPaar.getPriv().cardinality()+" and vector "+keyPaar.getDecayVector());
-        AtomicInteger i = new AtomicInteger(0);
-        BitSet result = bruteForceKey(keyPaar.getPriv(), keyPaar.getDecayVector(), keyPaar.getValidator(), i);
-        keyPaar.setPriv(result);
-        keyPaar.getDecayVector().clear(0,keyPaar.getDecayVector().size());
-        keyPaarRepository.save(keyPaar);
-        map.put("type", "success");
-        map.put("msg", "Successfully recovered key: Needed "+i+" rounds. Key: "+result);
-        return map;
-    }
-
-    public BitSet bruteForceKey(BitSet key, BitSet decayVector, byte[] validator, AtomicInteger i) {
-        BitSet currentDecayVector = (BitSet) decayVector.clone();
-        BitSet currentKey = (BitSet) key.clone();
-        if ( currentDecayVector.isEmpty() ) { // wenn der decayVector nur Nullen enthält, ist der key vollständig generiert und muss validiert werden.
-            i.incrementAndGet();
-            if ( validateRSAprivKey(currentKey.toByteArray(), validator) ) {
-                log.info("BruteForceKey: Found the right key:"+currentKey);
-                return currentKey;
-            } else {
-                log.info("BruteForceKey: Round "+i+" Wrong key tested: "+currentKey);
-                return null;
-            }
-        } else {
-            int firstSetBit = currentDecayVector.nextSetBit(0); // Erste 1 im Vektor suchen
-            currentDecayVector.clear(firstSetBit); // Die gefundene Position im DecayVector auf 0 setzen
-            BitSet firstResult = bruteForceKey(currentKey, currentDecayVector, validator, i); // Aufruf der Funktion mit der gefundenen Stelle im Key = 0
-            if (firstResult == null) { // Wenn beim ersten Aufruf kein Key gefunden wurde, dann zweiter Aufruf
-                currentKey.set(firstSetBit);
-                return bruteForceKey(currentKey, currentDecayVector, validator, i); // Aufruf der Funktion mit der gefundenen Stelle im Key = 1
-            } else {
-                return firstResult;
-            }
-        }
     }
 
     public boolean validateRSAprivKey(byte[] privKey, byte[] validator) {

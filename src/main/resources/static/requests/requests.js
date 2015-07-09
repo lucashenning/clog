@@ -6,11 +6,11 @@
 app.factory('RequestFactory', function($resource) {
     return $resource('/api/request/:id', { id: '@id' }, {
         approve: {method: 'POST', params: { approve: true } },
-        countEvents: {method: 'GET', url: '/api/request/:id/countevents'},
+        getProgress: {method: 'GET', url: '/api/request/:id/getprogress/'}
     });
 });
 
-app.controller('requests', function($scope, RequestFactory, $modal, $filter) {
+app.controller('requests', function($scope, RequestFactory, $modal, $filter, $http, $timeout) {
     $scope.requests = RequestFactory.query();
 
     $scope.alerts = [];
@@ -37,20 +37,27 @@ app.controller('requests', function($scope, RequestFactory, $modal, $filter) {
         })
     }
 
+    $scope.getProgress = function (request) {
+        $http.get('/api/request/'+request.id+'/getprogress/').
+            success(function(data) {
+                request.progress = data;
+            });
+        //$timeout($scope.getProgress(request), 1000);
+    }
+
+    $scope.countEvents = function (request) {
+        $http.get('/api/request/'+request.id+'/countevents/').
+            success(function(data) {
+                request.events = data;
+            });
+        //$timeout($scope.getProgress(request), 1000);
+    }
+
     $scope.approve = function (request) {
         request.$approve( {}, function(response) {
             $scope.alerts.splice(0, 1);
             $scope.alerts.push(response);
         });
-    }
-
-    $scope.countEvents = function (request) {
-        // TODO: Call Function to retrieve EventsCount here!
-        //return request.$countEvents(); // ENDLOS SCHLEIFE
-        $http.get('/api/request/'+request.id+'/countEvents/').
-            success(function(data) {
-                return data;
-            });
     }
 
     $scope.removeRecord = function(index) {

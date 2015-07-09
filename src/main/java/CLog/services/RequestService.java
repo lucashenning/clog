@@ -95,6 +95,7 @@ public class RequestService {
                 if (request.getApprovals().size() == 2) {
                     request.setStatus(2); // Status = approved
                     map.put("msg", "Request approved! And new Status: APPROVED! Beginning decryption as soon as possible...");
+                    execute(request);
                 }
                 requestRepository.save(request);
                 return map;
@@ -106,24 +107,31 @@ public class RequestService {
         }
     }
 
-    public boolean execute(Request request) {
-        // TODO: Request ausführen (async)
-        return true;
+    public void execute(Request request) {
+        // Recover Keys...
+        request.setStatus(3);
+        keyService.recoverMultipleKeys(request.getStartDate(), request.getEndDate());
+        // Copy Data and decrypt events
+        // request.setStatus(4);
+        // TODO: decrypt events here
+        // request.setStatus(5);
     }
 
-    public AtomicInteger getProgress(Request request) {
-        // TODO: Progress der Ausführung abfragen
-        return new AtomicInteger(0);
+    public Map getKeyRecoveryStatus() {
+        return keyService.getKeyRecoveryStatus();
     }
 
     public List<KeyPaar> getEventsOfRequest (Request request) {
         return keyService.findByTimestampBetween(request.getStartDate(), request.getEndDate());
     }
 
-    public int countEventsOfRequest (String id) {
+    public Map countEventsOfRequest (String id) {
         Request request = requestRepository.findOne(id);
-        log.info(request);
-        return getEventsOfRequest(request).size();
+        List <KeyPaar> list = getEventsOfRequest(request);
+        Map<String, Object> map = new HashMap<>();
+        map.put("count",list.size());
+        map.put("variants",keyService.countVariants(list));
+        return map;
     }
 
 }

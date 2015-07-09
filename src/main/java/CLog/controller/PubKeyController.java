@@ -4,6 +4,7 @@ import CLog.entities.EventDTO;
 import CLog.entities.KeyPaar;
 import CLog.entities.PubKeyDTO;
 import CLog.services.DecryptService;
+import CLog.services.KeyRecoveryService;
 import CLog.services.KeyService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -65,7 +66,12 @@ public class PubKeyController {
 
     @RequestMapping(value="/recover/{id}", method = RequestMethod.GET)
     public Map<String,Object> recover(@PathVariable String id) {
-        return keyService.recoverKey(id);
+        return keyService.recoverOneKey(id);
+    }
+
+    @RequestMapping(value="/countvariants/{id}", method = RequestMethod.GET)
+    public int countVariants(@PathVariable String id) {
+        return keyService.countVariants(keyService.findOne(id));
     }
 
 }

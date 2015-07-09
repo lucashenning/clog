@@ -26,6 +26,8 @@ app.controller('events', function($scope, $http) {
             success(function(data) {
                 $scope.alerts.splice(0, 1);
                 $scope.alerts.push(data);
+                event.numberOfDecayedBits++;
+                $scope.countVariants(event);
             });
     }
 
@@ -33,6 +35,13 @@ app.controller('events', function($scope, $http) {
         $http.get('/api/key/recover/'+event.id).
             success(function(data) {
                 $scope.alerts.push(data);
+            });
+    }
+
+    $scope.countVariants = function (event) {
+        $http.get('/api/key/countvariants/'+event.id).
+            success(function(data) {
+                event.variants = data;
             });
     }
 

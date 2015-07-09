@@ -20,6 +20,7 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.WebUtils;
+import org.springframework.scheduling.annotation.EnableAsync;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -31,6 +32,7 @@ import java.io.IOException;
 
 
 @SpringBootApplication
+@EnableAsync
 public class CLogApplication {
 
     public static void main(String[] args) {
@@ -38,8 +40,10 @@ public class CLogApplication {
     }
 
     @Configuration
+    @EnableAsync
     @Order(SecurityProperties.ACCESS_OVERRIDE_ORDER)
     protected static class SecurityConfiguration extends WebSecurityConfigurerAdapter {
+
 
         @Autowired
         private MongoUserDetailsService mongoUserDetailsService;

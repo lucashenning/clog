@@ -1,7 +1,10 @@
 package CLog.controller;
 
 import CLog.entities.Request;
+import CLog.services.KeyService;
 import CLog.services.RequestService;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,6 +18,8 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/request")
 public class RequestController {
+
+    private static Log log = LogFactory.getLog(RequestController.class);
 
     @Autowired
     private RequestService requestService;
@@ -51,8 +56,13 @@ public class RequestController {
     }
 
     @RequestMapping(value="/{id}/countevents", method = RequestMethod.GET)
-    public int countEvents(@PathVariable String id) {
+    public Map countEvents(@PathVariable String id) {
         return requestService.countEventsOfRequest(id);
+    }
+
+    @RequestMapping(value="/{id}/getprogress", method = RequestMethod.GET)
+    public Map getProgress(@PathVariable String id) {
+        return requestService.getKeyRecoveryStatus();
     }
 
     @RequestMapping(value="/{id}", method = RequestMethod.POST, params = "approve=true")

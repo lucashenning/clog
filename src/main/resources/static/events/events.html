@@ -21,11 +21,11 @@
         </tr>
         </thead>
         <tbody>
-        <tr ng-repeat="event in events | filter:search | orderBy:'timestamp'">
+        <tr ng-repeat="event in events | filter:search | orderBy:'timestamp'" ng-init="countVariants(event)">
             <td data-title="'Timestamp'">{{event.timestamp | date:"MM/dd/yyyy 'at' h:mma"}}</td>
             <td data-title="'Id'">{{event.id}}</td>
             <td data-title="'PubKey'" style="word-wrap: break-word;">{{event.pubKey}}</td>
-            <td data-title="'DecayedBits'" style="word-wrap: break-word;">{{event.numberOfDecayedBits}}</td>
+            <td data-title="'DecayedBits'" style="word-wrap: break-word;">{{event.numberOfDecayedBits}} (={{ event.variants }} variants)</td>
             <td data-title="'Actions'">
                 <a href="" ng-click="decrypt(event)" class="btn btn-success btn-xs" >Decrypt</a>
                 <a href="" ng-click="decay(event)" class="btn btn-warning btn-xs" >Decay</a>

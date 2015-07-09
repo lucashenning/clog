@@ -17,10 +17,9 @@ public class Request {
     private int status;
     // 1 = requested, but not approved
     // 2 = approved
-    // 3 = copying encrypted data
-    // 4 = calculating keys
-    // 5 = decrypting
-    // 6 = done
+    // 3 = calculating keys
+    // 4 = copying encrypted data and decrypting
+    // 5 = done
     private ArrayList<Approval> approvals = new ArrayList<>();
     private Date timestamp;
     private Date startDate;
