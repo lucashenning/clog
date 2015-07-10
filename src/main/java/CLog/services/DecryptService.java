@@ -7,6 +7,8 @@ import CLog.repositories.LogRepository;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.BadPaddingException;
@@ -20,6 +22,8 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Base64;
 import java.util.Map;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by l.henning on 24.06.2015.
@@ -41,7 +45,24 @@ public class DecryptService {
     @Autowired
     private DecryptedLogRepository decryptedLogRepository;
 
+    private AtomicInteger progress = new AtomicInteger(0);
+    public AtomicInteger getProgress() {
+        return progress;
+    }
+    public void setProgress(AtomicInteger progress) {
+        this.progress = progress;
+    }
+
+    private AtomicInteger max = new AtomicInteger(0);
+    public AtomicInteger getMax() {
+        return max;
+    }
+    public void setMax(AtomicInteger max) {
+        this.max = max;
+    }
+
     public String decrypt(String id) {
+        progress.incrementAndGet();
         // Read from Remote MongoDB
         Map<String,Object> map = logRepository.findOne(id);
         log.warn("Object received from remote MongoDB: "+map);
@@ -76,6 +97,7 @@ public class DecryptService {
         }
         return "Fehler";
     }
+
 
 
 }

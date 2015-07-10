@@ -62,7 +62,7 @@ public class RequestController {
 
     @RequestMapping(value="/{id}/getprogress", method = RequestMethod.GET)
     public Map getProgress(@PathVariable String id) {
-        return requestService.getKeyRecoveryStatus();
+        return requestService.getProgress(id);
     }
 
     @RequestMapping(value="/{id}", method = RequestMethod.POST, params = "approve=true")

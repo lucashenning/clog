@@ -33,6 +33,9 @@ public class RequestService {
     @Autowired
     private KeyService keyService;
 
+    @Autowired
+    private RequestExecutionService requestExecutionService;
+
     public Request newRequest(Request preRequest) {
         Request request = new Request();
         request.setTimestamp(preRequest.getTimestamp());
@@ -94,8 +97,8 @@ public class RequestService {
                 request.getApprovals().add(approval);
                 if (request.getApprovals().size() == 2) {
                     request.setStatus(2); // Status = approved
-                    map.put("msg", "Request approved! And new Status: APPROVED! Beginning decryption as soon as possible...");
-                    execute(request);
+                    map.put("msg", "Request approved! And new Status: APPROVED! Beginning with key recovery and decryption as soon as possible...");
+                    requestExecutionService.execute(request);
                 }
                 requestRepository.save(request);
                 return map;
@@ -105,16 +108,6 @@ public class RequestService {
             map.put("msg", "Request is already approved or closed.");
             return map;
         }
-    }
-
-    public void execute(Request request) {
-        // Recover Keys...
-        request.setStatus(3);
-        keyService.recoverMultipleKeys(request.getStartDate(), request.getEndDate());
-        // Copy Data and decrypt events
-        // request.setStatus(4);
-        // TODO: decrypt events here
-        // request.setStatus(5);
     }
 
     public Map getKeyRecoveryStatus() {
@@ -134,4 +127,16 @@ public class RequestService {
         return map;
     }
 
+    public Map getProgress(String id) {
+        Request request = requestRepository.findOne(id);
+        if (request.getStatus() == 3) {
+            return getKeyRecoveryStatus();
+        } else if (request.getStatus() == 4) {
+            return requestExecutionService.getRequestDecryptionStatus();
+        } else {
+            Map map = new HashMap<>();
+            map.put("msg", "Fehler");
+            return map;
+        }
+    }
 }

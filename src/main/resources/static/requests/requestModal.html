@@ -16,9 +16,9 @@
 
         <div class="form-group">
             <label for="startDate">Zeitraum</label>
-            <input dateformat ng-model="request.startDate" id="startDate" type="text" name="startDate" class="form-control" required />
+            <input dateformat ng-model="request.startDate" ng-change="changeDate()" id="startDate" type="text" name="startDate" class="form-control" required />
             bis
-            <input dateformat ng-model="request.endDate" id="endDate" type="text" name="endDate" class="form-control" required />
+            <input dateformat ng-model="request.endDate" ng-change="changeDate()" id="endDate" type="text" name="endDate" class="form-control" required />
             <script type="text/javascript">
                 $(function() {
                     $('input[name="startDate"]').daterangepicker({

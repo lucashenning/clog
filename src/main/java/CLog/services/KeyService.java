@@ -3,6 +3,7 @@ package CLog.services;
 import CLog.entities.EventDTO;
 import CLog.entities.KeyPaar;
 import CLog.entities.PubKeyDTO;
+import CLog.entities.Request;
 import CLog.repositories.KeyPaarRepository;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

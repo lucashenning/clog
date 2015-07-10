@@ -10,7 +10,7 @@ app.factory('RequestFactory', function($resource) {
     });
 });
 
-app.controller('requests', function($scope, RequestFactory, $modal, $filter, $http, $timeout) {
+app.controller('requests', function($scope, RequestFactory, $modal, $filter, $http, $timeout, $interval) {
     $scope.requests = RequestFactory.query();
 
     $scope.alerts = [];
@@ -38,25 +38,34 @@ app.controller('requests', function($scope, RequestFactory, $modal, $filter, $ht
     }
 
     $scope.getProgress = function (request) {
-        $http.get('/api/request/'+request.id+'/getprogress/').
-            success(function(data) {
-                request.progress = data;
-            });
-        //$timeout($scope.getProgress(request), 1000);
-    }
+        if (request.status == "3" || request.status == "4" ) {
+            $http.get('/api/request/' + request.id + '/getprogress/').
+                success(function (data) {
+                    request.progress = data;
+                });
+            $interval(function() {
+                $http.get('/api/request/' + request.id + '/getprogress/').
+                    success(function (data) {
+                        request.progress = data;
+                    });
+            },1000);
+        } else {
+            $scope.$apply();
+        }
+    };
 
     $scope.countEvents = function (request) {
         $http.get('/api/request/'+request.id+'/countevents/').
             success(function(data) {
                 request.events = data;
             });
-        //$timeout($scope.getProgress(request), 1000);
     }
 
     $scope.approve = function (request) {
         request.$approve( {}, function(response) {
             $scope.alerts.splice(0, 1);
             $scope.alerts.push(response);
+            $scope.requests = RequestFactory.query();
         });
     }
 
@@ -105,5 +114,6 @@ app.controller('requestModal', function($scope, $rootScope, $modalInstance, requ
         });
         $modalInstance.close();
     }
+
 
 });

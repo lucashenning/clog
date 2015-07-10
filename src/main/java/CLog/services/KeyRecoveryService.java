@@ -6,11 +6,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.List;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -49,7 +51,7 @@ public class KeyRecoveryService {
     }
 
     @Async
-    public void recoverKey(KeyPaar keyPaar) {
+    public Future<KeyPaar> recoverKey(KeyPaar keyPaar) {
         log.info("Starting Key Recovery for Key "+keyPaar.getId()+" with cardinality "+keyPaar.getPriv().cardinality()+" and vector "+keyPaar.getDecayVector());
         busyList.add(keyPaar.getId());
         BitSet result = bruteForceKey(keyPaar.getPriv(), keyPaar.getDecayVector(), keyPaar.getValidator(), progress);
@@ -57,6 +59,7 @@ public class KeyRecoveryService {
         keyPaar.getDecayVector().clear(0,keyPaar.getDecayVector().size());
         keyPaarRepository.save(keyPaar);
         busyList.remove(keyPaar.getId());
+        return new AsyncResult<>(keyPaar);
     }
 
     public BitSet bruteForceKey(BitSet key, BitSet decayVector, byte[] validator, AtomicInteger i) {

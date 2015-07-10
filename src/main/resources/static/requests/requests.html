@@ -34,7 +34,15 @@
             </div>
             <div ng-show="request.status == 3" ng-init="getProgress(request)">
                 <small><em>Recovering decayed keys...</em></small>
-                <p><progressbar class="progress-striped active" value="request.progress['progress']" max="request.progress['max']" type="info"> {{request.progress['progress']}} / {{request.progress['max']}}</progressbar></p>
+                <p><progressbar class="progress-striped active" value="request.progress['progress']" max="request.progress['max']" type="info"><span style="color:black; white-space:nowrap;">{{request.progress['progress']}} / {{request.progress['max']}} </span></progressbar></p>
+            </div>
+            <div ng-show="request.status == 4" ng-init="getProgress(request)">
+                <small><em>Decrypting events...</em></small>
+                <p><progressbar class="progress-striped active" value="request.progress['progress']" max="request.progress['max']" type="success"><span style="color:black; white-space:nowrap;">{{request.progress['progress']}} / {{request.progress['max']}}</span></progressbar></p>
+            </div>
+            <div ng-show="request.status == 5">
+                <small><em>This request has already been executed...</em></small>
+                <p><progressbar class="progress" value="request.progress['progress']" max="request.progress['max']" type="info"> Done </progressbar></p>
             </div>
         </td>
         <td data-title="'Initiator'">{{request.initiator['username']}}</td>
