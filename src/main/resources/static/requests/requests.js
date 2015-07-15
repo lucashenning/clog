@@ -65,7 +65,9 @@ app.controller('requests', function($scope, RequestFactory, $modal, $filter, $ht
         request.$approve( {}, function(response) {
             $scope.alerts.splice(0, 1);
             $scope.alerts.push(response);
-            $scope.requests = RequestFactory.query();
+            $timeout(function () {
+                $scope.requests = RequestFactory.query();
+            }, 1000);
         });
     }
 

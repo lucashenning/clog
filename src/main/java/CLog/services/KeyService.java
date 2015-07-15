@@ -192,12 +192,12 @@ public class KeyService {
         //int rnd = randInt(2424, 4471); // TODO: Exakte Länge des RSA-Keys bestimmen und nur relevante Bits löschen.
         int rnd = randInt(0, keyPaar.getPriv().size() - 1);
 
-        log.info("Card:"+keyPaar.getPriv().cardinality()+"Key before decay: "+byteToBinary(keyPaar.getPriv().toByteArray()));
+        log.debug("Card:"+keyPaar.getPriv().cardinality()+"Key before decay: "+byteToBinary(keyPaar.getPriv().toByteArray()));
 
         // Clear Random-Bit in privateKey
         keyPaar.getPriv().clear(rnd);
 
-        log.info("Card:"+keyPaar.getPriv().cardinality()+" Key after decay: "+byteToBinary(keyPaar.getPriv().toByteArray()));
+        log.debug("Card:"+keyPaar.getPriv().cardinality()+" Key after decay: "+byteToBinary(keyPaar.getPriv().toByteArray()));
 
         // Set Random-Bit in decayVector
         keyPaar.getDecayVector().set(rnd);
@@ -214,12 +214,12 @@ public class KeyService {
             byte[] byteResult = decryptRSA(validator, privKey);
             String stringResult = new String(byteResult);
             if ( stringResult.equals( configurationService.getValidationString() ) ) {
-                log.warn("Found the right String result (valid key): "+stringResult);
+                log.info("Found the right String result (valid key): "+stringResult);
                 return true;
             }
         } catch (NoSuchPaddingException | NoSuchAlgorithmException | InvalidKeyException | InvalidKeySpecException | IllegalBlockSizeException | BadPaddingException e) {
             //e.printStackTrace();
-            log.info("ValidateRSAKey: RSA Decryption Error --> Not a valid Key");
+            log.debug("ValidateRSAKey: RSA Decryption Error --> Not a valid Key");
         }
         return false;
     }

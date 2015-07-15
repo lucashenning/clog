@@ -3,7 +3,7 @@
  */
 app.controller('navigation',
 
-    function($rootScope, $scope, $http, $location) {
+    function($rootScope, $scope, $http, $location, $route) {
 
         var authenticate = function(credentials, callback) {
 
@@ -35,7 +35,7 @@ app.controller('navigation',
                     $location.path("/");
                     $scope.error = false;
                 } else {
-                    $location.path("/login");
+                    $location.path("/");
                     $scope.error = true;
                 }
             });
@@ -44,9 +44,12 @@ app.controller('navigation',
         $scope.logout = function() {
             $http.post('logout', {}).success(function() {
                 $rootScope.authenticated = false;
+                $route.reload();
                 $location.path("/");
             }).error(function(data) {
                 $rootScope.authenticated = false;
+                $route.reload();
+                $location.path("/");
             });
         }
 

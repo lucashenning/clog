@@ -68,10 +68,10 @@ public class KeyRecoveryService {
         if ( currentDecayVector.isEmpty() ) { // wenn der decayVector nur Nullen enthält, ist der key vollständig generiert und muss validiert werden.
             i.incrementAndGet();
             if ( keyService.validateRSAprivKey(currentKey.toByteArray(), validator) ) {
-                log.info("BruteForceKey: Found the right key:"+currentKey);
+                log.debug("BruteForceKey: Found the right key:"+currentKey);
                 return currentKey;
             } else {
-                log.info("BruteForceKey: Round "+i+" Wrong key tested: "+currentKey);
+                log.debug("BruteForceKey: Round "+i+" Wrong key tested: "+currentKey);
                 return null;
             }
         } else {
