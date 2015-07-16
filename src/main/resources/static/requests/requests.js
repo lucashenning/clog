@@ -48,9 +48,10 @@ app.controller('requests', function($scope, RequestFactory, $modal, $filter, $ht
                     success(function (data) {
                         request.progress = data;
                     });
-            },1000);
+                //request = RequestFactory.get({id:request.id});
+            },500);
         } else {
-            $scope.$apply();
+            request = RequestFactory.get(request.id);
         }
     };
 
@@ -67,7 +68,7 @@ app.controller('requests', function($scope, RequestFactory, $modal, $filter, $ht
             $scope.alerts.push(response);
             $timeout(function () {
                 $scope.requests = RequestFactory.query();
-            }, 1000);
+            }, 100);
         });
     }
 

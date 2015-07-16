@@ -44,12 +44,10 @@ app.controller('navigation',
         $scope.logout = function() {
             $http.post('logout', {}).success(function() {
                 $rootScope.authenticated = false;
-                $route.reload();
-                $location.path("/");
+                location.reload();
             }).error(function(data) {
                 $rootScope.authenticated = false;
-                $route.reload();
-                $location.path("/");
+                location.reload();
             });
         }
 
