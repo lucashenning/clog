@@ -65,27 +65,27 @@ public class DecryptService {
         progress.incrementAndGet();
         // Read from Remote MongoDB
         Map<String,Object> map = logRepository.findOne(id);
-        log.warn("Object received from remote MongoDB: "+map);
+        log.info("Object received from remote MongoDB: "+map);
 
         // Base64 Decode
         byte[] ciphertext = Base64.getDecoder().decode((String) map.get("ciphertext"));
         byte[] iv = Base64.getDecoder().decode((String) map.get("iv"));
-        log.warn("Encrypted Session Key is (Base64): "+(String) map.get("encrypted_session_key"));
+        log.info("Encrypted Session Key is (Base64): "+(String) map.get("encrypted_session_key"));
         byte[] encrypted_session_key = Base64.getDecoder().decode((String) map.get("encrypted_session_key"));
 
         try {
             // RSA Decrypt to get Session Key
             byte[] privKeyInBytes = keyService.findOne(id).getPriv().toByteArray();
             byte[] session_key = keyService.decryptRSA(encrypted_session_key, privKeyInBytes);
-            log.warn("RSA Result in Base 64: "+Base64.getEncoder().encodeToString(session_key));
+            log.info("RSA Result in Base 64: "+Base64.getEncoder().encodeToString(session_key));
 
             // AES Decrypt Event
             byte [] result = keyService.decryptAES(ciphertext, iv, session_key);
             String plaintext = new String(result);
-            log.warn("AES Result: "+plaintext);
+            log.info("AES Result: "+plaintext);
 
             // Write to Elastic
-            log.warn(decryptedLogRepository.add(plaintext).isCreated());
+            log.info(decryptedLogRepository.add(plaintext).isCreated());
 
             return plaintext;
 

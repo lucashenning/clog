@@ -188,9 +188,13 @@ public class KeyService {
     public Map decayKey(String keyPaarId) {
         HashMap map = new HashMap<>();
         KeyPaar keyPaar = keyPaarRepository.findOne(keyPaarId);
+        // Gesamt Bit-Länge des privaten Schlüssels: 9737
         // Random int inside the RSA private exponent. (between 2424 and 4471)
-        //int rnd = randInt(2424, 4471); // TODO: Exakte Länge des RSA-Keys bestimmen und nur relevante Bits löschen.
-        int rnd = randInt(0, keyPaar.getPriv().size() - 1);
+        // BitSet indiziert Bits von hinten.
+        // Das letzte Bit des privaten Exponenten ist 4471 (von hinten 9737 - 4471 = 5266).
+        // Das erste Bit des privaten Exponenten ist 2424 (von hinten 9737 - 2424 = 7313).
+        int rnd = randInt(5266, 7313); // TODO: Exakte Länge des RSA-Keys bestimmen und nur relevante Bits löschen.
+        //int rnd = randInt(0, keyPaar.getPriv().size() - 1);
 
         log.debug("Card:"+keyPaar.getPriv().cardinality()+"Key before decay: "+byteToBinary(keyPaar.getPriv().toByteArray()));
 

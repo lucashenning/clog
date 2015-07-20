@@ -10,7 +10,7 @@ app.factory('RequestFactory', function($resource) {
     });
 });
 
-app.controller('requests', function($scope, RequestFactory, $modal, $filter, $http, $timeout, $interval) {
+app.controller('requests', function($scope, RequestFactory, $modal, $filter, $http, $timeout, $interval, $route) {
     $scope.requests = RequestFactory.query();
 
     $scope.alerts = [];
@@ -47,11 +47,12 @@ app.controller('requests', function($scope, RequestFactory, $modal, $filter, $ht
                 $http.get('/api/request/' + request.id + '/getprogress/').
                     success(function (data) {
                         request.progress = data;
+                        if (request.progress.msg == "Fehler") {
+                            request.status = "5";
+                            $interval.cancel("cancel");
+                        }
                     });
-                //request = RequestFactory.get({id:request.id});
             },500);
-        } else {
-            request = RequestFactory.get(request.id);
         }
     };
 
