@@ -8,6 +8,10 @@ import CLog.repositories.KeyPaarRepository;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.BadPaddingException;
@@ -69,7 +73,7 @@ public class KeyService {
         log.info("Decay Vector created: "+decayVector);
         byte[] validator = {};
         try {
-            validator = encryptRSA(configurationService.getValidationString().getBytes(), pub.toByteArray());
+            validator = encryptRSA(configurationService.validationString.getBytes(), pub.toByteArray());
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         } catch (InvalidKeySpecException e) {
@@ -83,7 +87,7 @@ public class KeyService {
         } catch (NoSuchPaddingException e) {
             e.printStackTrace();
         }
-        log.info("Validator created: "+byteToBinary(validator));
+        log.info("Validator created: " + byteToBinary(validator));
         KeyPaar keyPaar = new KeyPaar(timestamp, pub, priv, decayVector, validator);
         // KeyPair in MongoDB abspeichern:
         return keyPaarRepository.save(keyPaar);
@@ -97,9 +101,9 @@ public class KeyService {
         return pubKeyDTO;
     }
 
-    public ArrayList<EventDTO> getAllKeyEvents() {
-        List<KeyPaar> keyPaars = keyPaarRepository.findAll();
-        ArrayList<EventDTO> events = new ArrayList<EventDTO>();
+    public Page<EventDTO> getAllKeyEvents(Pageable pageable) {
+        Page<KeyPaar> keyPaars = keyPaarRepository.findAll(pageable);
+        List<EventDTO> events = new ArrayList<>();
         for (KeyPaar keyPaar : keyPaars) {
             EventDTO current = new EventDTO();
             current.setId(keyPaar.getId());
@@ -108,7 +112,7 @@ public class KeyService {
             current.setNumberOfDecayedBits(keyPaar.getDecayVector().cardinality());
             events.add(current);
         }
-        return events;
+        return new PageImpl<>(events);
     }
 
     public long count() {
@@ -121,7 +125,7 @@ public class KeyService {
 
     public List<KeyPaar> findByTimestampBetween(Date startDate, Date endDate) {
         List<KeyPaar> list = keyPaarRepository.findByTimestampBetween(startDate, endDate);
-        log.info("Looked for KeyPairs between "+startDate+" and "+endDate+" ... found: "+list);
+        log.info("Looked for KeyPairs between " + startDate + " and " + endDate + " ... found: " + list);
         return list;
     }
 
@@ -217,7 +221,7 @@ public class KeyService {
         try {
             byte[] byteResult = decryptRSA(validator, privKey);
             String stringResult = new String(byteResult);
-            if ( stringResult.equals( configurationService.getValidationString() ) ) {
+            if ( stringResult.equals( configurationService.validationString ) ) {
                 log.info("Found the right String result (valid key): "+stringResult);
                 return true;
             }
@@ -264,5 +268,20 @@ public class KeyService {
             sb.append((bytes[i / Byte.SIZE] << i % Byte.SIZE & 0x80) == 0 ? '0' : '1');
         return sb.toString();
     }
+
+    @Scheduled( cron = "0 * * * * *" ) // "0 * * * * *" --> every minute / "0 0 1 * * ?" --> Every Night at 1 am
+    public void decayContinuously() {
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.DATE, -1); // Aelter als 1 Monat --> cal.add(Calendar.MONTH, -1);
+        Date endDate = cal.getTime();
+        List<KeyPaar> list = keyPaarRepository.findByTimestampBefore(endDate);
+        int i = 0;
+        for (KeyPaar kp : list) {
+            decayKey(kp.getId());
+            i++;
+        }
+        log.warn("Decay cronjob executed. "+i+" keys decayed.");
+    }
+
 
 }

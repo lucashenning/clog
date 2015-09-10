@@ -26,7 +26,7 @@ public class DecryptedLogRepository {
 
     @Autowired
     public DecryptedLogRepository (ConfigurationService configurationService){
-        this.node = nodeBuilder().client(true).clusterName(configurationService.getElasticSearchClusterName()).node();
+        this.node = nodeBuilder().client(true).clusterName(configurationService.elasticSearchClusterName).node();
         this.client = node.client();
     }
 

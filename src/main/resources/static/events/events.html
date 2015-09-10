@@ -19,18 +19,18 @@
             <th>Action</th>
         </tr>
         </thead>
-        <tbody ng-repeat="event in events | filter:search | orderBy:'timestamp'" ng-init="countVariants(event)" >
-        <tr>
+        <tbody infinite-scroll="loadPage(page + 1)" infinite-scroll-disabled="links['last'] == page"   >
+        <tr  ng-repeat-start="event in events | filter:search | orderBy:'timestamp'" ng-init="countVariants(event)" >
             <td data-title="'Timestamp'" data-toggle="collapse" data-target="#{{event.id}}" class="accordion-toggle">{{event.timestamp | date:"MM/dd/yyyy 'at' h:mma"}}</td>
             <td data-title="'Id'" data-toggle="collapse" data-target="#{{event.id}}" class="accordion-toggle">{{event.id}}</td>
             <td data-title="'DecayedBits'" style="word-wrap: break-word;" data-toggle="collapse" data-target="#{{event.id}}" class="accordion-toggle">{{event.numberOfDecayedBits}} (={{ event.variants }} variants)</td>
             <td data-title="'Actions'">
                 <a href="" ng-click="decrypt(event)" class="btn btn-success btn-xs" >Decrypt</a>
                 <a href="" ng-click="decay(event)" class="btn btn-warning btn-xs" >Decay</a>
-                <a href="" ng-click="recover(event)" class="btn btn-warning btn-xs" >Recover</a>
+                <a href="" ng-click="recover(event)" class="btn btn-primary btn-xs" >Recover</a>
             </td>
         </tr>
-        <tr>
+        <tr ng-repeat-end >
             <td colspan="4" class="hiddenRow"><div class="accordion-body collapse" id="{{event.id}}">
                 <div class="row">
                     <div class="col-sm-12" style="word-wrap: break-word;"><b>Public Key:</b><p>{{event.pubKey}}</p></div>

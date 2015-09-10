@@ -28,8 +28,8 @@ public class LogRepository {
     @Autowired
     public LogRepository(ConfigurationService config) {
         this.ip = config.logMongoDbIp;
-        this.collection = config.getLogMongoDbCollection();
-        this.db = config.getLogMongoDbDb();
+        this.collection = config.logMongoDbCollection;
+        this.db = config.logMongoDbDb;
         try {
             mongoClient = new MongoClient(this.ip);
         } catch (UnknownHostException e) {

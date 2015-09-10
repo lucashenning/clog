@@ -13,4 +13,6 @@ public interface KeyPaarRepository extends MongoRepository<KeyPaar, String> {
 
     List<KeyPaar> findByTimestampBetween(Date startDate, Date endDate);
 
+    List<KeyPaar> findByTimestampBefore(Date endDate);
+
 }

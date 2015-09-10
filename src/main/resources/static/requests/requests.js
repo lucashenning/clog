@@ -113,7 +113,7 @@ app.controller('requestModal', function($scope, $rootScope, $modalInstance, requ
         $scope.request.$save();
         requests.push($scope.request);
         alerts.push({
-            msg: "Neuer Request erfolgreich angelegt.",
+            msg: "Request gespeichert.",
             type: "success"
         });
         $modalInstance.close();

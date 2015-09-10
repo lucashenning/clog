@@ -9,7 +9,7 @@ app.controller('home', function($scope, RequestFactory, $http) {
                 $scope.countRequests = data;
             });
 
-        $http.get('/api/key/count').
+        $http.get('/api/event/count').
             success(function(data) {
                 $scope.countEvents = data;
             });

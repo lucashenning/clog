@@ -1,4 +1,4 @@
-var app = angular.module('clog', ['ngRoute', 'ngResource', 'ui.bootstrap']);
+var app = angular.module('clog', ['ngRoute', 'ngResource', 'ui.bootstrap', 'infinite-scroll']);
 
 app.directive('dateformat', function($filter) {
     var dateFilter = $filter('date');
@@ -51,15 +51,6 @@ app.directive('ngReallyClick', ['$modal', function($modal) {
         link: function(scope, element, attrs) {
             element.bind('click', function() {
                 var message = attrs.ngReallyMessage || "Are you sure ?";
-
-                /*
-                 //This works
-                 if (message && confirm(message)) {
-                 scope.$apply(attrs.ngReallyClick);
-                 }
-                 //*/
-
-                //*This doesn't works
                 var modalHtml = '<div class="modal-body">' + message + '</div>';
                 modalHtml += '<div class="modal-footer"><button class="btn btn-primary" ng-click="ok()">OK</button><button class="btn btn-warning" ng-click="cancel()">Cancel</button></div>';
 
@@ -80,3 +71,36 @@ app.directive('ngReallyClick', ['$modal', function($modal) {
         }
     }
 }]);
+
+app.service('ParseLinks', function () {
+    this.parse = function (header) {
+        if (header.length == 0) {
+            throw new Error("input must not be of zero length");
+        }
+
+        // Split parts by comma
+        var parts = header.split(',');
+        var links = {};
+        // Parse each part into a named link
+        angular.forEach(parts, function (p) {
+            var section = p.split(';');
+            if (section.length != 2) {
+                throw new Error("section could not be split on ';'");
+            }
+            var url = section[0].replace(/<(.*)>/, '$1').trim();
+            var queryString = {};
+            url.replace(
+                new RegExp("([^?=&]+)(=([^&]*))?", "g"),
+                function($0, $1, $2, $3) { queryString[$1] = $3; }
+            );
+            var page = queryString['page'];
+            if( angular.isString(page) ) {
+                page = parseInt(page);
+            }
+            var name = section[1].replace(/rel="(.*)"/, '$1').trim();
+            links[name] = page;
+        });
+
+        return links;
+    }
+});

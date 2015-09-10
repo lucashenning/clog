@@ -52,7 +52,7 @@ public class RequestService {
     }
 
     public Request editRequest(Request request) {
-        // TODO: Request Approvals clearn.
+        request.setApprovals(new ArrayList<>());
         return requestRepository.save(request);
     }
 
