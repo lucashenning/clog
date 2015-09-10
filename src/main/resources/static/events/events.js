@@ -18,6 +18,11 @@ app.controller('events', function($scope, $http) {
         $http.get('/api/key/decrypt/'+event.id).
             success(function(data) {
                 $scope.alerts.push(data);
+            }).error(function(data) {
+                $scope.alerts.push({
+                    msg: "Fehler in der Datenübertragung: "+data.message,
+                    type: "warning"
+                });
             });
     }
 

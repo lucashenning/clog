@@ -21,10 +21,10 @@
         <th>Actions</th>
     </tr>
     </thead>
-    <tbody ng-repeat="request in requests | filter:search | orderBy:'timestamp'" data-toggle="collapse" data-target="#{{request.id}}" class="accordion-toggle">
+    <tbody ng-repeat="request in requests | filter:search | orderBy:'timestamp'" >
     <tr >
         <td><i class="glyphicon glyphicon glyphicon-triangle-right" aria-hidden="true"></i></td>
-        <td data-title="'Status'">
+        <td data-title="'Status'" data-toggle="collapse" data-target="#{{request.id}}" class="accordion-toggle">
             <div ng-show="request.status == 1">
                 <small><em>Waiting for Approvals...</em></small>
                 <progressbar class="progress" value="getApprovals(request)" max="3" type="warning">{{getApprovals(request)}} / 3</progressbar>
@@ -45,9 +45,9 @@
                 <p><progressbar class="progress" value="request.progress['progress']" max="request.progress['max']" type="info"> Done </progressbar></p>
             </div>
         </td>
-        <td data-title="'Initiator'">{{request.initiator['username']}}</td>
-        <td data-title="'Created'">{{request.timestamp | date:"dd.MM.yyyy"}}</td>
-        <td data-title="'Zeitraum'">
+        <td data-title="'Initiator'" data-toggle="collapse" data-target="#{{request.id}}" class="accordion-toggle">{{request.initiator['username']}}</td>
+        <td data-title="'Created'" data-toggle="collapse" data-target="#{{request.id}}" class="accordion-toggle">{{request.timestamp | date:"dd.MM.yyyy"}}</td>
+        <td data-title="'Zeitraum'" data-toggle="collapse" data-target="#{{request.id}}" class="accordion-toggle">
             <div ng-init="countEvents(request)">
                 <p>{{request.startDate | date:"dd.MM.yyyy"}} bis {{request.endDate | date:"dd.MM.yyyy"}}</p>
                 <p>= {{ request.events['count'] }} events / {{ request.events['variants'] }} variants</p>
@@ -69,9 +69,6 @@
             </div>
         </div></td>
     </tr>
-    <script>
-
-    </script>
 
     </tbody>
 </table>

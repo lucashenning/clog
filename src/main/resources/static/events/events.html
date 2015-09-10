@@ -10,27 +10,32 @@
         </span>
     </div>
 </section>
-    <table class="table table-striped" style="table-layout: fixed; width: 100%;">
+    <table class="table table-hover" style="table-layout: fixed; width: 100%;">
         <thead>
         <tr>
             <th>Timestamp</th>
             <th>Id</th>
-            <th>PubKey</th>
             <th>Decayed Bits</th>
             <th>Action</th>
         </tr>
         </thead>
-        <tbody>
-        <tr ng-repeat="event in events | filter:search | orderBy:'timestamp'" ng-init="countVariants(event)">
-            <td data-title="'Timestamp'">{{event.timestamp | date:"MM/dd/yyyy 'at' h:mma"}}</td>
-            <td data-title="'Id'">{{event.id}}</td>
-            <td data-title="'PubKey'" style="word-wrap: break-word;">{{event.pubKey}}</td>
-            <td data-title="'DecayedBits'" style="word-wrap: break-word;">{{event.numberOfDecayedBits}} (={{ event.variants }} variants)</td>
+        <tbody ng-repeat="event in events | filter:search | orderBy:'timestamp'" ng-init="countVariants(event)" >
+        <tr>
+            <td data-title="'Timestamp'" data-toggle="collapse" data-target="#{{event.id}}" class="accordion-toggle">{{event.timestamp | date:"MM/dd/yyyy 'at' h:mma"}}</td>
+            <td data-title="'Id'" data-toggle="collapse" data-target="#{{event.id}}" class="accordion-toggle">{{event.id}}</td>
+            <td data-title="'DecayedBits'" style="word-wrap: break-word;" data-toggle="collapse" data-target="#{{event.id}}" class="accordion-toggle">{{event.numberOfDecayedBits}} (={{ event.variants }} variants)</td>
             <td data-title="'Actions'">
                 <a href="" ng-click="decrypt(event)" class="btn btn-success btn-xs" >Decrypt</a>
                 <a href="" ng-click="decay(event)" class="btn btn-warning btn-xs" >Decay</a>
                 <a href="" ng-click="recover(event)" class="btn btn-warning btn-xs" >Recover</a>
             </td>
+        </tr>
+        <tr>
+            <td colspan="4" class="hiddenRow"><div class="accordion-body collapse" id="{{event.id}}">
+                <div class="row">
+                    <div class="col-sm-12" style="word-wrap: break-word;"><b>Public Key:</b><p>{{event.pubKey}}</p></div>
+                </div>
+            </div></td>
         </tr>
         </tbody>
     </table>
