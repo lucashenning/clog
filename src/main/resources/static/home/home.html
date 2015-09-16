@@ -1,4 +1,4 @@
-<div  ng-controller="home" ng-cloak class="ng-cloak">
+<div ng-controller="home" ng-cloak class="ng-cloak">
     <alert ng-repeat="alert in alerts" type="{{alert.type}}" close="closeAlert($index)">{{alert.msg}}</alert>
     <div ng-show="!authenticated">
         <div class="jumbotron"><h1>Welcome to cLog...</h1>

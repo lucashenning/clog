@@ -27,8 +27,8 @@ public class UserService {
     @PostConstruct
     public void addDefaultUser() {
         User user = new User();
-        user.setUsername("defaultUser");
-        user.setPassword("defaultUser");
+        user.setUsername("user");
+        user.setPassword("user");
         User search = userRepository.findByUsername(user.getUsername());
         if (search == null) {
             userRepository.save(user);

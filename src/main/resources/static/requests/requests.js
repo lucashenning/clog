@@ -2,7 +2,6 @@
  * Created by l.henning on 16.06.2015.
  */
 
-
 app.factory('RequestFactory', function($resource) {
     return $resource('/api/request/:id', { id: '@id' }, {
         approve: {method: 'POST', params: { approve: true } },
@@ -35,7 +34,7 @@ app.controller('requests', function($scope, RequestFactory, $modal, $filter, $ht
                 }
             }
         })
-    }
+    };
 
     $scope.getProgress = function (request) {
         if (request.status == "3" || request.status == "4" ) {
@@ -61,7 +60,7 @@ app.controller('requests', function($scope, RequestFactory, $modal, $filter, $ht
             success(function(data) {
                 request.events = data;
             });
-    }
+    };
 
     $scope.approve = function (request) {
         request.$approve( {}, function(response) {
@@ -71,7 +70,7 @@ app.controller('requests', function($scope, RequestFactory, $modal, $filter, $ht
                 $scope.requests = RequestFactory.query();
             }, 100);
         });
-    }
+    };
 
     $scope.removeRecord = function(index) {
         $scope.requests[index].$remove(); //remove from Factory
@@ -81,7 +80,7 @@ app.controller('requests', function($scope, RequestFactory, $modal, $filter, $ht
             type: 'success',
             msg: "Request erfolgreich entfernt!"
         });
-    }
+    };
 
     $scope.getApprovals = function (request) {
         if (request.approvals != null) {
@@ -101,13 +100,13 @@ app.controller('requestModal', function($scope, $rootScope, $modalInstance, requ
         $scope.request = new RequestFactory;
         $scope.request.initiator = {
             username : $rootScope.username
-        }
+        };
         $scope.newrequest = true;
     }
 
     $scope.closeModal = function () {
         $modalInstance.close();
-    }
+    };
 
     $scope.saveModal = function () {
         $scope.request.$save();

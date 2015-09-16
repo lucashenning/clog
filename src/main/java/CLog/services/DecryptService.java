@@ -1,5 +1,6 @@
 package CLog.services;
 
+import CLog.entities.DecryptedLogEntry;
 import CLog.entities.KeyPaar;
 import CLog.repositories.DecryptedLogRepository;
 import CLog.repositories.KeyPaarRepository;
@@ -21,6 +22,7 @@ import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Base64;
+import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -61,10 +63,10 @@ public class DecryptService {
         this.max = max;
     }
 
-    public String decrypt(String id) {
+    public String decrypt(KeyPaar keyPaar) {
         progress.incrementAndGet();
         // Read from Remote MongoDB
-        Map<String,Object> map = logRepository.findOne(id);
+        Map<String,Object> map = logRepository.findOne(keyPaar.getId());
         log.info("Object received from remote MongoDB: "+map);
 
         // Base64 Decode
@@ -75,7 +77,7 @@ public class DecryptService {
 
         try {
             // RSA Decrypt to get Session Key
-            byte[] privKeyInBytes = keyService.findOne(id).getPriv().toByteArray();
+            byte[] privKeyInBytes = keyService.findOne(keyPaar.getId()).getPriv().toByteArray();
             byte[] session_key = keyService.decryptRSA(encrypted_session_key, privKeyInBytes);
             log.info("RSA Result in Base 64: "+Base64.getEncoder().encodeToString(session_key));
 
@@ -85,9 +87,13 @@ public class DecryptService {
             log.info("AES Result: "+plaintext);
 
             // Write to Elastic
-            log.info(decryptedLogRepository.add(plaintext).isCreated());
+            DecryptedLogEntry decryptedLogEntry = new DecryptedLogEntry();
+            decryptedLogEntry.setId(keyPaar.getId());
+            decryptedLogEntry.setPlaintext(plaintext);
+            decryptedLogEntry.setTimestamp(keyPaar.getTimestamp());
+            decryptedLogRepository.save(decryptedLogEntry);
 
-            return plaintext;
+            return "Decrypted Message: "+plaintext;
 
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidKeySpecException | IllegalBlockSizeException | InvalidAlgorithmParameterException e) {
             e.printStackTrace();

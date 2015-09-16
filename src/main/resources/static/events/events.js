@@ -44,7 +44,7 @@ app.controller('events', function($scope, $http, EventFactory, ParseLinks) {
             }).error(function(data) {
                 $scope.alerts.splice(0, 1);
                 $scope.alerts.push({
-                    msg: "Fehler in der Datenübertragung: "+data.message,
+                    msg: "Fehler beim Abruf des Events vom Log-Server: "+data.message,
                     type: "danger"
                 });
             });

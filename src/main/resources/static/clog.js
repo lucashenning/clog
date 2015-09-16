@@ -14,7 +14,7 @@ app.directive('dateformat', function($filter) {
 
             ngModelCtrl.$parsers.push(function(valueFromInput) {
                 // return how data should be stored in model
-                return parseDate(valueFromInput,"dd.mm.yyyy");
+                return parseDate(valueFromInput, "dd.mm.yyyy");
             });
 
         }

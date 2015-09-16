@@ -17,6 +17,7 @@ app.controller('navigation',
                     $rootScope.authenticated = true;
                 } else {
                     $rootScope.authenticated = false;
+                    $location.path("/");
                 }
                 callback && callback();
             }).error(function() {
@@ -25,7 +26,7 @@ app.controller('navigation',
                 callback && callback();
             });
 
-        }
+        };
 
         authenticate();
         $scope.credentials = {};
@@ -44,9 +45,12 @@ app.controller('navigation',
         $scope.logout = function() {
             $http.post('logout', {}).success(function() {
                 $rootScope.authenticated = false;
+                $location.path("/");
                 location.reload();
+
             }).error(function(data) {
                 $rootScope.authenticated = false;
+                $location.path("/");
                 location.reload();
             });
         }

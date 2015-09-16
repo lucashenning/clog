@@ -1,0 +1,29 @@
+<div ng-controller="results" ng-cloak class="ng-cloak">
+<h1>Results</h1>
+<h3>See decrypted events here.</h3>
+<alert ng-repeat="alert in alerts" type="{{alert.type}}" close="closeAlert($index)">{{alert.msg}}</alert>
+<section>
+    <div class="input-group">
+        <input type="text" ng-model="search" class="search-query pull-left form-control" placeholder="Suche...">
+        <span class="input-group-btn">
+            <button class="btn btn-default" type="button">Go!</button>
+        </span>
+    </div>
+</section>
+    <table class="table table-striped" style="width: 100%;">
+        <thead>
+        <tr>
+            <th>Timestamp</th>
+            <th>Id</th>
+            <th>Message</th>
+        </tr>
+        </thead>
+        <tbody infinite-scroll="loadPage(page + 1)" infinite-scroll-disabled="links['last'] == page"   >
+        <tr  ng-repeat="result in results | filter:search | orderBy:'-timestamp'" >
+            <td data-title="'Timestamp'" data-toggle="collapse" data-target="#{{result.id}}" class="accordion-toggle">{{result.timestamp | date:"dd.MM.yyyy H:mm:ss"}}</td>
+            <td data-title="'Id'" data-toggle="collapse" data-target="#{{result.id}}" class="accordion-toggle">{{result.id}}</td>
+            <td data-title="'Message'" data-toggle="collapse" data-target="#{{result.id}}" class="accordion-toggle">{{result.plaintext}}</td>
+        </tr>
+        </tbody>
+    </table>
+</div>

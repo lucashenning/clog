@@ -9,9 +9,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class ConfigurationService {
 
-    @Value("${elasticsearch.clustername}")
-    public String elasticSearchClusterName;
-
     @Value("${logmongodb.ip}")
     public String logMongoDbIp;
 

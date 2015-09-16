@@ -21,7 +21,7 @@
         <th>Actions</th>
     </tr>
     </thead>
-    <tbody ng-repeat="request in requests | filter:search | orderBy:'timestamp'" >
+    <tbody ng-repeat="request in requests | filter:search | orderBy:'-timestamp'" >
     <tr >
         <td><i class="glyphicon glyphicon glyphicon-triangle-right" aria-hidden="true"></i></td>
         <td data-title="'Status'" data-toggle="collapse" data-target="#{{request.id}}" class="accordion-toggle">
@@ -46,7 +46,7 @@
             </div>
         </td>
         <td data-title="'Initiator'" data-toggle="collapse" data-target="#{{request.id}}" class="accordion-toggle">{{request.initiator['username']}}</td>
-        <td data-title="'Created'" data-toggle="collapse" data-target="#{{request.id}}" class="accordion-toggle">{{request.timestamp | date:"dd.MM.yyyy"}}</td>
+        <td data-title="'Created'" data-toggle="collapse" data-target="#{{request.id}}" class="accordion-toggle">{{request.timestamp | date:"dd.MM.yyyy H:mm:ss"}}</td>
         <td data-title="'Zeitraum'" data-toggle="collapse" data-target="#{{request.id}}" class="accordion-toggle">
             <div ng-init="countEvents(request)">
                 <p>{{request.startDate | date:"dd.MM.yyyy"}} bis {{request.endDate | date:"dd.MM.yyyy"}}</p>
@@ -64,7 +64,7 @@
         <td colspan="5" class="hiddenRow"><div class="accordion-body collapse" id="{{request.id}}">
             <div class="row">
                 <div class="col-sm-3"><b>ID:</b><p>{{request.id}}</p></div>
-                <div class="col-sm-3"><b>Approvals:</b><p ng-repeat="approval in request.approvals">{{approval.approver['username']}} ({{approval.timestamp | date:"dd.MM.yyyy"}})</p></div>
+                <div class="col-sm-3"><b>Approvals:</b><p ng-repeat="approval in request.approvals">{{approval.approver['username']}} ({{approval.timestamp | date:"dd.MM.yyyy H:mm:ss"}})</p></div>
                 <div class="col-sm-3"><b>Comment:</b><p>{{request.comment}}</p></div>
             </div>
         </div></td>

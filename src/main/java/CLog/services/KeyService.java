@@ -125,7 +125,7 @@ public class KeyService {
 
     public List<KeyPaar> findByTimestampBetween(Date startDate, Date endDate) {
         List<KeyPaar> list = keyPaarRepository.findByTimestampBetween(startDate, endDate);
-        log.info("Looked for KeyPairs between " + startDate + " and " + endDate + " ... found: " + list);
+        //log.info("Looked for KeyPairs between " + startDate + " and " + endDate + " ... found: " + list);
         return list;
     }
 
@@ -269,7 +269,7 @@ public class KeyService {
         return sb.toString();
     }
 
-    @Scheduled( cron = "0 * * * * *" ) // "0 * * * * *" --> every minute / "0 0 1 * * ?" --> Every Night at 1 am
+    @Scheduled( cron = "0 0 1 * * ?" ) // "0 * * * * *" --> every minute / "0 0 1 * * ?" --> Every Night at 1 am
     public void decayContinuously() {
         Calendar cal = Calendar.getInstance();
         cal.add(Calendar.DATE, -1); // Aelter als 1 Monat --> cal.add(Calendar.MONTH, -1);
@@ -280,7 +280,7 @@ public class KeyService {
             decayKey(kp.getId());
             i++;
         }
-        log.warn("Decay cronjob executed. "+i+" keys decayed.");
+        log.info("Decay cronjob executed. " + i + " keys decayed.");
     }
 
 

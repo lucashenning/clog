@@ -1,8 +1,6 @@
 /**
  * Created by l.henning on 16.06.2015.
  */
-
-
 app.factory('UserFactory', function($resource) {
     return $resource('/api/user/:id', { id: '@id' }   );
 });
@@ -28,7 +26,7 @@ app.controller('users', function($scope, UserFactory, $modal) {
                 }
             }
         })
-    }
+    };
 
     $scope.removeRecord = function(index) {
         $scope.users[index].$remove(); //remove from Factory
@@ -53,7 +51,7 @@ app.controller('userModal', function($scope, $rootScope, $modalInstance, user, U
 
     $scope.closeModal = function () {
         $modalInstance.close();
-    }
+    };
 
     $scope.saveModal = function () {
         $scope.user.$save();

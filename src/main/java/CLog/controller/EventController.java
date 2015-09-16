@@ -1,10 +1,12 @@
 package CLog.controller;
 
 import CLog.entities.EventDTO;
+import CLog.entities.KeyPaar;
 import CLog.services.DecryptService;
 import CLog.services.KeyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -12,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URISyntaxException;
+import java.security.Key;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,7 +41,7 @@ public class EventController {
     public ResponseEntity<List<EventDTO>> getAll(@RequestParam(value = "page" , required = false) Integer offset,
                                                  @RequestParam(value = "per_page", required = false) Integer limit)
             throws URISyntaxException {
-        Page<EventDTO> page = keyService.getAllKeyEvents(PaginationUtil.generatePageRequest(offset, limit));
+        Page<EventDTO> page = keyService.getAllKeyEvents(PaginationUtil.generatePageRequest(offset, limit, new Sort(Sort.Direction.DESC, "timestamp")));
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/event", offset, limit);
         return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);
     }
@@ -50,7 +53,8 @@ public class EventController {
 
     @RequestMapping(value="/decrypt/{id}", method = RequestMethod.GET)
     public Map<String,Object> decrypt(@PathVariable String id) {
-        String result = decryptService.decrypt(id);
+        KeyPaar keyPaar = keyService.findOne(id);
+        String result = decryptService.decrypt(keyPaar);
         Map<String,Object> map = new HashMap<String,Object>();
         map.put("type","success");
         map.put("msg",result);

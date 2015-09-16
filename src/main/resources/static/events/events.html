@@ -20,8 +20,8 @@
         </tr>
         </thead>
         <tbody infinite-scroll="loadPage(page + 1)" infinite-scroll-disabled="links['last'] == page"   >
-        <tr  ng-repeat-start="event in events | filter:search | orderBy:'timestamp'" ng-init="countVariants(event)" >
-            <td data-title="'Timestamp'" data-toggle="collapse" data-target="#{{event.id}}" class="accordion-toggle">{{event.timestamp | date:"MM/dd/yyyy 'at' h:mma"}}</td>
+        <tr  ng-repeat-start="event in events | filter:search | orderBy:'-timestamp'" ng-init="countVariants(event)" >
+            <td data-title="'Timestamp'" data-toggle="collapse" data-target="#{{event.id}}" class="accordion-toggle">{{event.timestamp | date:"dd.MM.yyyy H:mm"}}</td>
             <td data-title="'Id'" data-toggle="collapse" data-target="#{{event.id}}" class="accordion-toggle">{{event.id}}</td>
             <td data-title="'DecayedBits'" style="word-wrap: break-word;" data-toggle="collapse" data-target="#{{event.id}}" class="accordion-toggle">{{event.numberOfDecayedBits}} (={{ event.variants }} variants)</td>
             <td data-title="'Actions'">

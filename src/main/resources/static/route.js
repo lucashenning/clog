@@ -12,6 +12,8 @@ app.config(function ($routeProvider, $httpProvider) {
             templateUrl: "events/events.html"
         }).when("/users", {
             templateUrl: "users/users.html"
+        }).when("/results", {
+            templateUrl: "results/results.html"
         }).otherwise({
             redirectTo: "/"
         });

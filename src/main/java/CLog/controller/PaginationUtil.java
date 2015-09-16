@@ -1,8 +1,10 @@
 package CLog.controller;
 
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 
 import java.net.URI;
@@ -25,6 +27,16 @@ public class PaginationUtil {
     public static final int DEFAULT_LIMIT = 20;
 
     public static final int MAX_LIMIT = 100;
+
+    public static Pageable generatePageRequest(Integer offset, Integer limit, Sort sort) {
+        if (offset == null || offset < MIN_OFFSET) {
+            offset = DEFAULT_OFFSET;
+        }
+        if (limit == null || limit > MAX_LIMIT) {
+            limit = DEFAULT_LIMIT;
+        }
+        return new PageRequest(offset - 1, limit, sort);
+    }
 
     public static Pageable generatePageRequest(Integer offset, Integer limit) {
         if (offset == null || offset < MIN_OFFSET) {

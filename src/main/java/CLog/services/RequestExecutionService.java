@@ -65,7 +65,7 @@ public class RequestExecutionService {
         decryptService.setProgress(new AtomicInteger(0));
         decryptService.setMax(new AtomicInteger(list.size()));
         for (KeyPaar k : list) {
-            decryptService.decrypt(k.getId());
+            decryptService.decrypt(k);
         }
         log.info("Key Decryption ist fertig!");
         request.setStatus(5);
