@@ -1,8 +1,6 @@
 package CLog.controller;
 
-import CLog.entities.Request;
 import CLog.entities.User;
-import CLog.services.MongoUserDetailsService;
 import CLog.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

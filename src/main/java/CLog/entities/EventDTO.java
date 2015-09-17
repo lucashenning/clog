@@ -2,7 +2,6 @@ package CLog.entities;
 
 import org.springframework.data.annotation.Id;
 
-import java.security.PublicKey;
 import java.util.Date;
 
 /**

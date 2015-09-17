@@ -9,14 +9,14 @@ import org.springframework.stereotype.Service;
 @Service
 public class ConfigurationService {
 
-    @Value("${logmongodb.ip}")
-    public String logMongoDbIp;
+    @Value("${logserver.mongodb.ip}")
+    public String logServerMongoDbIp;
 
-    @Value("${logmongodb.collection}")
-    public String logMongoDbCollection;
+    @Value("${logserver.mongodb.collection}")
+    public String logServerMongoDbCollection;
 
-    @Value("${logmongodb.db}")
-    public String logMongoDbDb;
+    @Value("${logserver.mongodb.db}")
+    public String logServerMongoDbDb;
 
     @Value("${rsa.validation.string}")
     public String validationString;

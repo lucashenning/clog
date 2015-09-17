@@ -3,13 +3,9 @@ package CLog.repositories;
 import CLog.services.ConfigurationService;
 import com.mongodb.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 
 import java.net.UnknownHostException;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -27,9 +23,9 @@ public class LogRepository {
 
     @Autowired
     public LogRepository(ConfigurationService config) {
-        this.ip = config.logMongoDbIp;
-        this.collection = config.logMongoDbCollection;
-        this.db = config.logMongoDbDb;
+        this.ip = config.logServerMongoDbIp;
+        this.collection = config.logServerMongoDbCollection;
+        this.db = config.logServerMongoDbDb;
         try {
             mongoClient = new MongoClient(this.ip);
         } catch (UnknownHostException e) {

@@ -1,7 +1,5 @@
 package CLog.entities;
 
-import java.security.PublicKey;
-
 /**
  * Created by Lucas on 01.06.2015.
  */

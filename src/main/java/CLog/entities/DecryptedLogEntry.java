@@ -3,7 +3,6 @@ package CLog.entities;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 
-
 import java.util.Date;
 
 /**
