@@ -12,7 +12,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import javax.validation.constraints.Null;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Created by l.henning on 17.06.2015.
@@ -71,7 +73,7 @@ public class RequestService {
         return requestRepository.count();
     }
 
-    public Map<String, Object> approve(String id) {
+    public Map<String, Object> approve(String id) throws ExecutionException, InterruptedException {
         Request request = requestRepository.findOne(id);
         Map<String, Object> map = new HashMap<>();
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -95,10 +97,11 @@ public class RequestService {
                 request.getApprovals().add(approval);
                 if (request.getApprovals().size() == 2) {
                     request.setStatus(2); // Status = approved
-                    map.put("msg", "Request approved! And new Status: APPROVED! Beginning with key recovery and decryption as soon as possible...");
+                    map.put("msg", "Request approved! Beginning with key recovery and decryption as soon as possible...");
                     requestExecutionService.execute(request);
+                } else {
+                    requestRepository.save(request);
                 }
-                requestRepository.save(request);
                 return map;
             }
         } else {
@@ -108,12 +111,12 @@ public class RequestService {
         }
     }
 
-    public Map getKeyRecoveryStatus() {
-        return keyService.getKeyRecoveryStatus();
-    }
-
     public List<KeyPaar> getEventsOfRequest (Request request) {
-        return keyService.findByTimestampBetween(request.getStartDate(), request.getEndDate());
+        try {
+            return keyService.findByTimestampBetween(request.getStartDate(), request.getEndDate());
+        } catch (NullPointerException e) {
+            return new ArrayList<>();
+        }
     }
 
     public Map countEventsOfRequest (String id) {
@@ -127,14 +130,20 @@ public class RequestService {
 
     public Map getProgress(String id) {
         Request request = requestRepository.findOne(id);
-        if (request.getStatus() == 3) {
-            return getKeyRecoveryStatus();
-        } else if (request.getStatus() == 4) {
-            return requestExecutionService.getRequestDecryptionStatus();
-        } else {
-            Map map = new HashMap<>();
+        Map<String, Object> map = new HashMap<>();
+        try {
+            if (request.getStatus() == 3) {
+                map = keyService.getKeyRecoveryStatus();
+                map.put("status",3);
+            } else if (request.getStatus() == 4) {
+                map = requestExecutionService.getRequestDecryptionStatus();
+                map.put("status",4);
+            } else if (request.getStatus() == 5) {
+                map.put("status",5);
+            }
+        } catch (NullPointerException e) {
             map.put("msg", "Fehler");
-            return map;
         }
+        return map;
     }
 }

@@ -25,13 +25,9 @@ public class PubKeyController {
     @RequestMapping(method = RequestMethod.GET)
     public PubKeyDTO getKey() {
         KeyPaar keyPaar = keyService.generateKeyPaar();
+        keyService.saveKeyPaar(keyPaar);
         log.info("New KeyPaar generated. Pub Key: "+keyPaar.getPub());
-        return KeyService.getPubKey(keyPaar);
+        return KeyService.getPubKeyDTO(keyPaar);
     }
-
-
-
-
-
 
 }

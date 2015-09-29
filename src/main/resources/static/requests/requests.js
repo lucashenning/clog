@@ -4,12 +4,11 @@
 
 app.factory('RequestFactory', function($resource) {
     return $resource('/api/request/:id', { id: '@id' }, {
-        approve: {method: 'POST', params: { approve: true } },
-        getProgress: {method: 'GET', url: '/api/request/:id/getprogress/'}
+        approve: {method: 'POST', params: { approve: true } }
     });
 });
 
-app.controller('requests', function($scope, RequestFactory, $modal, $filter, $http, $timeout, $interval, $route) {
+app.controller('requests', function($scope, RequestFactory, $modal, $filter, $http, $timeout, $interval) {
     $scope.requests = RequestFactory.query();
 
     $scope.alerts = [];
@@ -46,8 +45,9 @@ app.controller('requests', function($scope, RequestFactory, $modal, $filter, $ht
                 $http.get('/api/request/' + request.id + '/getprogress/').
                     success(function (data) {
                         request.progress = data;
-                        if (request.progress.msg == "Fehler") {
+                        if (request.progress.status == "5") {
                             request.status = "5";
+                            $scope.request.status = "5";
                             $interval.cancel("cancel");
                         }
                     });

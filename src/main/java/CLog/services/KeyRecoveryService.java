@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
+import org.springframework.util.concurrent.ListenableFuture;
 
 import java.util.ArrayList;
 import java.util.BitSet;
@@ -25,9 +26,6 @@ public class KeyRecoveryService {
 
     @Autowired
     private KeyService keyService;
-
-    @Autowired
-    private KeyPaarRepository keyPaarRepository;
 
     private AtomicInteger progress = new AtomicInteger(0);
     public AtomicInteger getProgress() {
@@ -51,15 +49,22 @@ public class KeyRecoveryService {
     }
 
     @Async
-    public Future<KeyPaar> recoverKey(KeyPaar keyPaar) {
+    public ListenableFuture<KeyPaar> recoverKeyPaar(KeyPaar keyPaar) {
         log.info("Starting Key Recovery for Key "+keyPaar.getId()+" with cardinality "+keyPaar.getPriv().cardinality()+" and vector "+keyPaar.getDecayVector());
         busyList.add(keyPaar.getId());
         BitSet result = bruteForceKey(keyPaar.getPriv(), keyPaar.getDecayVector(), keyPaar.getValidator(), progress);
         keyPaar.setPriv(result);
         keyPaar.getDecayVector().clear(0,keyPaar.getDecayVector().size());
-        keyPaarRepository.save(keyPaar);
         busyList.remove(keyPaar.getId());
         return new AsyncResult<>(keyPaar);
+    }
+
+    @Async
+    public ListenableFuture<BitSet> bruteForceDecayVector(KeyPaar keyPaar) {
+        busyList.add(keyPaar.getId());
+        BitSet result = bruteForceKey(keyPaar.getPriv(), keyPaar.getDecayVector(), keyPaar.getValidator(), progress);
+        busyList.remove(keyPaar.getId());
+        return new AsyncResult<>(result);
     }
 
     public BitSet bruteForceKey(BitSet key, BitSet decayVector, byte[] validator, AtomicInteger i) {

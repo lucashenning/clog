@@ -10,8 +10,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.util.concurrent.ListenableFutureCallback;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -25,6 +28,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
@@ -89,10 +93,14 @@ public class KeyService {
         log.info("Validator created: " + byteToBinary(validator));
         KeyPaar keyPaar = new KeyPaar(timestamp, pub, priv, decayVector, validator);
         // KeyPair in MongoDB abspeichern:
+        return keyPaar;
+    }
+
+    public KeyPaar saveKeyPaar(KeyPaar keyPaar) {
         return keyPaarRepository.save(keyPaar);
     }
 
-    public static PubKeyDTO getPubKey(KeyPaar keyPaar) {
+    public static PubKeyDTO getPubKeyDTO(KeyPaar keyPaar) {
         PubKeyDTO pubKeyDTO = new PubKeyDTO();
         pubKeyDTO.setId(keyPaar.getId());
         pubKeyDTO.setPubKey(bitSetToBase64(keyPaar.getPub()));
@@ -128,13 +136,38 @@ public class KeyService {
         return list;
     }
 
-    public boolean recoverKeys(List<KeyPaar> list) {
+    public Map recoverSingleKey(String id) {
+        KeyPaar keyPaar = keyPaarRepository.findOne(id);
+        recoverSingleKey(keyPaar);
+        HashMap map = new HashMap<>();
+        map.put("type", "success");
+        map.put("msg", "Key Recovery started...");
+        return map;
+    }
+
+    public ListenableFuture<KeyPaar> recoverSingleKey(KeyPaar keyPaar) {
+        ListenableFuture<KeyPaar> keyPaarListenableFuture = keyRecoveryService.recoverKeyPaar(keyPaar);
+        keyPaarListenableFuture.addCallback(new ListenableFutureCallback<KeyPaar>() {
+            @Override
+            public void onSuccess(KeyPaar newKeyPaar){
+                keyPaarRepository.save(keyPaar);
+            }
+            @Override
+            public void onFailure(Throwable t){
+                log.error("Error executing callback.", t);
+            }
+        });
+        return keyPaarListenableFuture;
+    }
+
+    public ListenableFuture<List<KeyPaar>> recoverKeyList(List<KeyPaar> oldKeyPaarList) throws ExecutionException, InterruptedException {
         keyRecoveryService.setProgress(new AtomicInteger(0));
-        keyRecoveryService.setMax(new AtomicInteger(countVariants(list)));
-        for (KeyPaar k : list) {
-            keyRecoveryService.recoverKey(k);
+        keyRecoveryService.setMax(new AtomicInteger(countVariants(oldKeyPaarList)));
+        List<KeyPaar> newKeyPaarList = new ArrayList<>();
+        for (KeyPaar keyPaar : oldKeyPaarList) {
+            newKeyPaarList.add(recoverSingleKey(keyPaar).get());
         }
-        return true;
+        return new AsyncResult<>(newKeyPaarList);
     }
 
     public int countVariants(List<KeyPaar> list) {
@@ -146,11 +179,15 @@ public class KeyService {
     }
 
     public int countVariants(KeyPaar k) {
-        return (int) Math.pow( 2, k.getDecayVector().cardinality());
+        return countVariants(k.getDecayVector().cardinality());
+    }
+
+    public int countVariants(int cardinality) {
+        return (int) Math.pow( 2, cardinality);
     }
 
     public Map getKeyRecoveryStatus() {
-        Map<String, Object> map= new HashMap<>();
+        Map<String, Object> map = new HashMap<>();
         if (keyRecoveryService.isBusy()) {
             map.put("progress",keyRecoveryService.getProgress());
             map.put("max",keyRecoveryService.getMax());
@@ -160,37 +197,20 @@ public class KeyService {
         return map;
     }
 
-    public Map recoverOneKey(String id) {
-        KeyPaar keyPaar = keyPaarRepository.findOne(id);
-        List<KeyPaar> list = new ArrayList<KeyPaar>();
-        list.add(keyPaar);
-        HashMap map = new HashMap<>();
-        if ( recoverKeys(list) ) {
-            map.put("type", "success");
-            map.put("msg", "Key Recovery started...");
-        } else {
-            map.put("type", "error");
-            map.put("msg", "Error in KeyRecovery");
-        }
-        return map;
-    }
-
-    public Map recoverMultipleKeys(Date startDate, Date endDate) {
-        List<KeyPaar> list = findByTimestampBetween(startDate, endDate);
-        HashMap map = new HashMap<>();
-        if ( recoverKeys(list) ) {
-            map.put("type", "success");
-            map.put("msg", "Key Recovery started for "+list.size()+" keys...");
-        } else {
-            map.put("type", "error");
-            map.put("msg", "Error in KeyRecovery");
-        }
-        return map;
-    }
-
     public Map decayKey(String keyPaarId) {
         HashMap map = new HashMap<>();
         KeyPaar keyPaar = keyPaarRepository.findOne(keyPaarId);
+
+        keyPaar = decayKey(keyPaar);
+
+        keyPaarRepository.save(keyPaar);
+        map.put("type", "success");
+        map.put("msg", "New decayVector: "+keyPaar.getDecayVector());
+        log.info("Key decayed! New decayVector: "+keyPaar.getDecayVector());
+        return map;
+    }
+
+    public KeyPaar decayKey(KeyPaar keyPaar) {
         // Gesamt Bit-Länge des privaten Schlüssels: 9737
         // Random int inside the RSA private exponent. (between 2424 and 4471)
         // BitSet indiziert Bits von hinten.
@@ -208,12 +228,7 @@ public class KeyService {
 
         // Set Random-Bit in decayVector
         keyPaar.getDecayVector().set(rnd);
-
-        keyPaarRepository.save(keyPaar);
-        map.put("type", "success");
-        map.put("msg", "rnd: "+rnd+" new decayVector: "+keyPaar.getDecayVector());
-        log.info("Key decayed! rnd: "+rnd+" New decayVector: "+keyPaar.getDecayVector());
-        return map;
+        return keyPaar;
     }
 
     public boolean validateRSAprivKey(byte[] privKey, byte[] validator) {

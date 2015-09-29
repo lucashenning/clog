@@ -67,7 +67,7 @@ public class EventController {
 
     @RequestMapping(value="/recover/{id}", method = RequestMethod.GET)
     public Map<String,Object> recover(@PathVariable String id) {
-        return keyService.recoverOneKey(id);
+        return keyService.recoverSingleKey(id);
     }
 
     @RequestMapping(value="/countvariants/{id}", method = RequestMethod.GET)

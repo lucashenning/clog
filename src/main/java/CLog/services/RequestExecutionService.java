@@ -9,11 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
+import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.util.concurrent.ListenableFutureCallback;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -29,9 +29,6 @@ public class RequestExecutionService {
     private RequestService requestService;
 
     @Autowired
-    private KeyRecoveryService keyRecoveryService;
-
-    @Autowired
     private KeyService keyService;
 
     @Autowired
@@ -41,45 +38,30 @@ public class RequestExecutionService {
     private DecryptService decryptService;
 
     @Async
-    public Future<Request> execute(Request request) {
+    public void execute(Request request) throws ExecutionException, InterruptedException {
         // Set Status to "Calculating Keys"
         request.setStatus(3);
         requestRepository.save(request);
         List<KeyPaar> list = requestService.getEventsOfRequest(request);
-        List<Future<KeyPaar>> futureList = new ArrayList<>();
-        keyRecoveryService.setProgress(new AtomicInteger(0));
-        keyRecoveryService.setMax(new AtomicInteger(keyService.countVariants(list)));
-        for (KeyPaar k : list) {
-            futureList.add(keyRecoveryService.recoverKey(k));
-        }
-        while (!isDone(futureList)) {
-            // wait for KeyRecovery
-        }
-
+        ListenableFuture<List<KeyPaar>> listenableFutureKeyPaarList = keyService.recoverKeyList(list);
+        list = listenableFutureKeyPaarList.get(); // Wait for Key Recovery
 
         log.info("keyRecovery Service ist fertig!");
         // Set Status to "copying and decrypting"
         request.setStatus(4);
         requestRepository.save(request);
+
         // Copy Data and decrypt events
         decryptService.setProgress(new AtomicInteger(0));
         decryptService.setMax(new AtomicInteger(list.size()));
         for (KeyPaar k : list) {
             decryptService.decrypt(k);
         }
+
+        // Key Decryption fertig
         log.info("Key Decryption ist fertig!");
         request.setStatus(5);
         requestRepository.save(request);
-        return new AsyncResult<>(request);
-    }
-
-    public boolean isDone(List<Future<KeyPaar>> futureList) {
-        for (Future f : futureList) {
-            if (!f.isDone()) {
-                return false;
-            }
-        }
-        return true;
     }
 
     public Map getRequestDecryptionStatus() {

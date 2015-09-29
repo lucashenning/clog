@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Created by l.henning on 16.06.2015.
@@ -64,7 +65,7 @@ public class RequestController {
     }
 
     @RequestMapping(value="/{id}", method = RequestMethod.POST, params = "approve=true")
-    public Map<String,Object> approve(@PathVariable String id) {
+    public Map<String,Object> approve(@PathVariable String id) throws ExecutionException, InterruptedException {
         return requestService.approve(id);
     }
 
