@@ -9,10 +9,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.net.URISyntaxException;
 import java.util.List;
@@ -34,6 +31,11 @@ public class ResultController {
         Page<DecryptedLogEntry> page = resultService.getAllResults(PaginationUtil.generatePageRequest(offset, limit, new Sort(Sort.Direction.DESC, "timestamp")));
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, "/api/results", offset, limit);
         return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);
+    }
+
+    @RequestMapping(value="/{id}", method = RequestMethod.DELETE)
+    public void delete(@PathVariable String id) {
+        resultService.deleteResult(id);
     }
 
 }

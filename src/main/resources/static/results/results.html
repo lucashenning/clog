@@ -16,6 +16,7 @@
             <th>Timestamp</th>
             <th>Id</th>
             <th>Message</th>
+            <th>Actions</th>
         </tr>
         </thead>
         <tbody infinite-scroll="loadPage(page + 1)" infinite-scroll-disabled="links['last'] == page"   >
@@ -23,6 +24,9 @@
             <td data-title="'Timestamp'" data-toggle="collapse" data-target="#{{result.id}}" class="accordion-toggle">{{result.timestamp | date:"dd.MM.yyyy H:mm:ss"}}</td>
             <td data-title="'Id'" data-toggle="collapse" data-target="#{{result.id}}" class="accordion-toggle">{{result.id}}</td>
             <td data-title="'Message'" data-toggle="collapse" data-target="#{{result.id}}" class="accordion-toggle">{{result.plaintext}}</td>
+            <td data-title="'Actions'">
+                <a href="" ng-really-message="Do you really want to delete this result?" ng-really-click="removeRecord($index)" class="btn btn-default btn-xs" >Delete</a>
+            </td>
         </tr>
         </tbody>
     </table>

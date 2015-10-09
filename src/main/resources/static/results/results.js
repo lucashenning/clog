@@ -32,5 +32,15 @@ app.controller('results', function($scope, $http, ResultFactory, ParseLinks) {
         $scope.alerts.splice(index, 1);
     };
 
+    $scope.removeRecord = function(index) {
+        $scope.results[index].$remove(); //remove from Factory
+        $scope.results.splice(index,1); // remove from DOM
+        $scope.alerts.splice(0, 1);
+        $scope.alerts.push({
+            type: 'success',
+            msg: "Result erfolgreich entfernt!"
+        });
+    };
+
 
 });

@@ -20,4 +20,7 @@ public class ResultService {
         return decryptedLogRepository.findAll(pageable);
     }
 
+    public void deleteResult(String id) {
+        decryptedLogRepository.delete(id);
+    }
 }
